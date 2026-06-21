@@ -22,6 +22,7 @@ import {
   Star,
   UsersRound,
 } from "lucide-react";
+import { CountUpNumber } from "@/components/count-up-number";
 import { ThemeToggle } from "@/components/theme-toggle";
 
 const contact = {
@@ -156,6 +157,7 @@ const skillGroups = [
       { name: "MySQL", icon: "/icons/mysql.svg" },
       { name: "MongoDB", icon: "/icons/mongodb.svg" },
       { name: "AWS", icon: "/icons/aws.svg" },
+      { name: "Google Cloud", icon: "/icons/googlecloud.svg" },
       { name: "Docker", icon: "/icons/docker.svg" },
     ],
   },
@@ -166,6 +168,7 @@ const skillGroups = [
       { name: "Notion", icon: "/icons/notion.svg" },
       { name: "Git", icon: "/icons/git.svg" },
       { name: "Jira", icon: "/icons/jira.svg" },
+      { name: "Slack", icon: "/icons/slack.svg" },
     ],
   },
 ];
@@ -199,13 +202,14 @@ const projects = [
 
 const stats: Array<{
   label: string;
-  value: string;
+  value: number;
+  suffix: string;
   icon: LucideIcon;
 }> = [
-  { label: "경력", value: "5+", icon: CalendarDays },
-  { label: "프로젝트", value: "15+", icon: FileText },
-  { label: "협업/이해관계자", value: "20+", icon: UsersRound },
-  { label: "책임감과 실행력", value: "100%", icon: Star },
+  { label: "경력", value: 5, suffix: "+", icon: CalendarDays },
+  { label: "프로젝트", value: 15, suffix: "+", icon: FileText },
+  { label: "협업/이해관계자", value: 20, suffix: "+", icon: UsersRound },
+  { label: "책임감과 실행력", value: 100, suffix: "%", icon: Star },
 ];
 
 export default function Home() {
@@ -422,50 +426,53 @@ function InsightSection() {
 function GlobalExperienceSection() {
   return (
     <section className="relative mt-8 scroll-mt-24 overflow-hidden bg-slate-950">
-      <Image
-        src="/world_map.jpg"
-        alt=""
-        fill
-        sizes="100vw"
-        className="object-cover object-center opacity-90"
-      />
-      <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(2,6,23,0.96)_0%,rgba(15,23,42,0.84)_42%,rgba(15,23,42,0.24)_100%)]" />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_76%_45%,rgba(37,99,235,0.24),transparent_38%)]" />
+      <div className="absolute inset-0">
+        <Image
+          src="/world_map.jpg"
+          alt=""
+          fill
+          sizes="100vw"
+          className="object-contain object-right opacity-45 sm:opacity-55 lg:object-right"
+        />
+      </div>
+      <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(2,6,23,0.98)_0%,rgba(15,23,42,0.9)_38%,rgba(15,23,42,0.4)_72%,rgba(15,23,42,0.18)_100%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_82%_48%,rgba(37,99,235,0.18),transparent_42%)]" />
 
-      <div className="relative mx-auto grid min-h-[430px] max-w-7xl items-center gap-10 px-5 py-14 sm:px-8 lg:grid-cols-[0.86fr_1.14fr] lg:py-18">
-        <div>
+      <div className="relative mx-auto grid min-h-[470px] max-w-7xl items-center gap-10 px-5 py-14 sm:px-8 lg:grid-cols-[0.82fr_1.18fr] lg:py-18">
+        <div className="max-w-2xl">
           <p className="text-sm font-black uppercase tracking-[0.24em] text-blue-300">
-            Global Experience
+            World Travel Experience
           </p>
-          <h2 className="mt-5 max-w-xl text-4xl font-black leading-tight tracking-normal text-white sm:text-5xl">
-            현장을 넓히는 여행 경험으로 산업과 사용자를 입체적으로 봅니다.
+          <h2 className="mt-5 break-keep text-4xl font-black leading-tight tracking-normal text-white sm:text-5xl">
+            세계여행으로 보고서 밖의 산업과 기업을 직접 확인했습니다.
           </h2>
-          <p className="mt-6 max-w-2xl text-base font-medium leading-8 text-slate-200 sm:text-lg">
-            아시아, 북미, 남미, 아프리카, 오세아니아에서 직접 마주한 도시와
-            시장의 차이를 제품 기획과 리서치의 관점으로 연결합니다.
+          <p className="mt-6 break-keep text-base font-medium leading-8 text-slate-200 sm:text-lg">
+            책과 사업보고서로 공부한 산업 구조를 실제 도시, 상권, 이동 경로,
+            기업 현장에서 두 눈으로 확인했습니다. 여행은 단순한 이동이 아니라
+            산업과 기업을 현실의 맥락으로 이해하는 훈련이었습니다.
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
-            {["Asia", "North America", "South America", "Africa", "Oceania"].map(
-              (region) => (
-                <span
-                  key={region}
-                  className="rounded-full border border-white/15 bg-white/10 px-4 py-2 text-xs font-black text-white shadow-sm backdrop-blur"
-                >
-                  {region}
-                </span>
-              ),
-            )}
-            <span className="rounded-full border border-blue-200/30 bg-blue-400/16 px-4 py-2 text-xs font-black text-blue-100 shadow-sm backdrop-blur">
-              Europe excluded
-            </span>
+            {[
+              "세계여행 기반 관찰",
+              "산업 구조의 실물감",
+              "기업과 도시의 연결",
+              "보고서 밖의 현장",
+            ].map((item) => (
+              <span
+                key={item}
+                className="rounded-full border border-white/15 bg-white/10 px-4 py-2 text-xs font-black text-white shadow-sm backdrop-blur"
+              >
+                {item}
+              </span>
+            ))}
           </div>
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-3 lg:self-end">
           {[
-            ["5", "Continents"],
-            ["Market", "Context"],
-            ["User", "Perspective"],
+            ["World", "Travel"],
+            ["Industry", "Field Notes"],
+            ["Company", "Real Context"],
           ].map(([value, label]) => (
             <div
               key={label}
@@ -501,18 +508,22 @@ function SkillsSection() {
             </h3>
             <div className="mt-5 grid grid-cols-4 gap-3">
               {group.items.map((item) => (
-                <div key={item.name} className="min-w-0 text-center">
-                  <div className="mx-auto grid h-14 w-14 place-items-center rounded-xl border border-slate-200 bg-white p-3 shadow-sm dark:border-white/10 dark:bg-white">
+                <div
+                  key={item.name}
+                  className="group min-w-0 cursor-default text-center"
+                  title={item.name}
+                >
+                  <div className="mx-auto grid h-14 w-14 place-items-center rounded-xl border border-slate-200 bg-white p-3 shadow-sm transition duration-300 ease-out group-hover:-translate-y-1 group-hover:scale-110 group-hover:border-blue-200 group-hover:shadow-[0_16px_34px_rgba(37,99,235,0.18)] group-hover:ring-4 group-hover:ring-blue-500/10 dark:border-white/10 dark:bg-white dark:group-hover:border-blue-200">
                     <Image
                       src={item.icon}
                       alt={`${item.name} logo`}
                       width={40}
                       height={40}
                       unoptimized
-                      className="h-9 w-9 object-contain"
+                      className="h-9 w-9 object-contain transition duration-300 group-hover:scale-105"
                     />
                   </div>
-                  <p className="mt-2 flex h-8 items-start justify-center text-center text-[10px] font-bold leading-tight text-slate-600 dark:text-slate-300">
+                  <p className="mt-2 flex h-8 items-start justify-center text-center text-[10px] font-bold leading-tight text-slate-600 transition group-hover:text-blue-700 dark:text-slate-300 dark:group-hover:text-blue-200">
                     {item.name}
                   </p>
                 </div>
@@ -547,20 +558,20 @@ function ProjectsSection() {
         {projects.map((project) => (
           <article
             key={project.title}
-            className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-[0_20px_55px_rgba(15,23,42,0.12)] dark:border-white/10 dark:bg-white/6"
+            className="flex h-full flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-[0_20px_55px_rgba(15,23,42,0.12)] dark:border-white/10 dark:bg-white/6"
           >
             <ProjectPreview variant={project.variant} />
-            <div className="p-5">
-              <span className="text-xs font-extrabold text-blue-600 dark:text-blue-300">
+            <div className="flex flex-1 flex-col p-5">
+              <span className="block h-4 text-xs font-extrabold text-blue-600 dark:text-blue-300">
                 {project.type}
               </span>
-              <h3 className="mt-2 text-xl font-extrabold text-slate-950 dark:text-white">
+              <h3 className="mt-2 min-h-[56px] text-xl font-extrabold leading-7 text-slate-950 dark:text-white">
                 {project.title}
               </h3>
-              <p className="mt-3 text-sm font-medium leading-7 text-slate-600 dark:text-slate-300">
+              <p className="mt-3 min-h-[84px] text-sm font-medium leading-7 text-slate-600 dark:text-slate-300">
                 {project.description}
               </p>
-              <div className="mt-5 flex flex-wrap gap-2">
+              <div className="mt-auto flex flex-wrap gap-2 pt-5">
                 {project.tags.map((tag) => (
                   <span
                     key={tag}
@@ -611,7 +622,7 @@ function AboutSection() {
               aria-hidden="true"
             />
             <p className="mt-5 text-4xl font-black tracking-normal text-slate-950 dark:text-white">
-              {stat.value}
+              <CountUpNumber value={stat.value} suffix={stat.suffix} />
             </p>
             <p className="mt-2 text-sm font-extrabold text-slate-600 dark:text-slate-300">
               {stat.label}
