@@ -50,8 +50,18 @@ const socialLinks: Array<{
   lucideIcon?: LucideIcon;
   color?: string;
 }> = [
-  { label: "GitHub", href: contact.github, brandIcon: siGithub, color: "#181717" },
-  { label: "Blog", href: contact.blog, brandIcon: siNaver, color: "#03C75A" },
+  {
+    label: "GitHub",
+    href: contact.github,
+    brandIcon: siGithub,
+    color: "currentColor",
+  },
+  {
+    label: "Blog",
+    href: contact.blog,
+    brandIcon: siNaver,
+    color: "currentColor",
+  },
   { label: "Email", href: `mailto:${contact.email}`, lucideIcon: Mail },
 ];
 
