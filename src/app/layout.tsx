@@ -18,15 +18,15 @@ export const metadata: Metadata = {
     "문제 해결을 설계하고 가치를 만드는 Full-stack Developer & Designer 포트폴리오",
   metadataBase: new URL("https://portfolio-landing-chi-six.vercel.app"),
   icons: {
-    icon: "/favicon.png",
-    apple: "/favicon.png",
+    icon: "/favicon_v1.png",
+    apple: "/favicon_v1.png",
   },
   openGraph: {
     title: "윤태준(YUN TAE JUN) | Full-stack Developer & Designer",
     description:
       "사용자 중심의 디자인과 견고한 기술로 비즈니스 가치를 연결하는 포트폴리오",
     url: "https://portfolio-landing-chi-six.vercel.app",
-    images: ["/favicon.png"],
+    images: ["/favicon_v1.png"],
     type: "website",
   },
 };

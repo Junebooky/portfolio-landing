@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import { CountUpNumber } from "@/components/count-up-number";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { TravelImageSlider } from "@/components/travel-image-slider";
 
 const contact = {
   name: "윤태준(YUN TAE JUN)",
@@ -155,7 +156,9 @@ const skillGroups = [
     title: "Database & Infra",
     items: [
       { name: "MySQL", icon: "/icons/mysql.svg" },
+      { name: "PostgreSQL", icon: "/icons/postgresql.svg" },
       { name: "MongoDB", icon: "/icons/mongodb.svg" },
+      { name: "Supabase", icon: "/icons/supabase.svg" },
       { name: "AWS", icon: "/icons/aws.svg" },
       { name: "Google Cloud", icon: "/icons/googlecloud.svg" },
       { name: "Docker", icon: "/icons/docker.svg" },
@@ -426,23 +429,25 @@ function InsightSection() {
 function GlobalExperienceSection() {
   return (
     <section className="relative mt-8 scroll-mt-24 overflow-hidden bg-slate-950">
-      <div className="absolute inset-0">
+      <div className="absolute inset-y-0 left-0 z-0 w-full bg-[#050b18] lg:w-[35.4%]" />
+      <div className="absolute inset-y-0 left-0 right-0 lg:left-[35.4%]">
         <Image
           src="/world_map.jpg"
           alt=""
           fill
           sizes="100vw"
-          className="object-contain object-right opacity-45 sm:opacity-55 lg:object-right"
+          className="object-cover object-center opacity-[0.42] lg:object-contain lg:object-right lg:opacity-50"
         />
       </div>
-      <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(2,6,23,0.98)_0%,rgba(15,23,42,0.9)_38%,rgba(15,23,42,0.4)_72%,rgba(15,23,42,0.18)_100%)]" />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_82%_48%,rgba(37,99,235,0.18),transparent_42%)]" />
+      <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(2,6,23,0.98)_0%,rgba(7,13,28,0.96)_35%,rgba(15,23,42,0.62)_58%,rgba(15,23,42,0.22)_100%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_66%_45%,rgba(37,99,235,0.18),transparent_42%)]" />
 
-      <div className="relative mx-auto grid min-h-[470px] max-w-7xl items-center gap-10 px-5 py-14 sm:px-8 lg:grid-cols-[0.82fr_1.18fr] lg:py-18">
-        <div className="max-w-2xl">
+      <div className="relative mx-auto grid min-h-[690px] max-w-[1560px] items-center gap-10 px-5 py-14 sm:px-8 lg:grid-cols-[0.58fr_1.42fr] lg:gap-16 lg:py-18">
+        <div className="max-w-2xl lg:max-w-md lg:pl-8 xl:pl-14">
           <p className="text-sm font-black uppercase tracking-[0.24em] text-blue-300">
             World Travel Experience
           </p>
+          <span className="mt-7 block h-px w-16 bg-blue-200/70" />
           <h2 className="mt-5 break-keep text-4xl font-black leading-tight tracking-normal text-white sm:text-5xl">
             세계여행으로 보고서 밖의 산업과 기업을 직접 확인했습니다.
           </h2>
@@ -468,23 +473,7 @@ function GlobalExperienceSection() {
           </div>
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-3 lg:self-end">
-          {[
-            ["World", "Travel"],
-            ["Industry", "Field Notes"],
-            ["Company", "Real Context"],
-          ].map(([value, label]) => (
-            <div
-              key={label}
-              className="border-l border-white/20 bg-white/[0.07] p-5 backdrop-blur-md"
-            >
-              <p className="text-3xl font-black text-white">{value}</p>
-              <p className="mt-2 text-sm font-bold uppercase tracking-[0.14em] text-blue-100">
-                {label}
-              </p>
-            </div>
-          ))}
-        </div>
+        <TravelImageSlider />
       </div>
     </section>
   );
