@@ -8,6 +8,7 @@ import {
   useRef,
   useState,
   type FormEvent,
+  type KeyboardEvent as ReactKeyboardEvent,
 } from "react";
 import {
   AlarmClockOff,
@@ -15,15 +16,21 @@ import {
   Check,
   ChevronLeft,
   ChevronRight,
+  ExternalLink,
+  ListTodo,
+  LoaderCircle,
   Pencil,
   Plus,
+  RadioTower,
   Save,
   Sprout,
   Trash2,
   X,
 } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { CATEGORY_LABELS } from "@/lib/planner/constants";
+import { CategoryPicker } from "@/components/planner/category-picker";
+import { WaitingItemsPanel } from "@/components/planner/waiting-items-panel";
+import styles from "@/components/planner/planner-dashboard.module.css";
 import {
   formatKoreanDate,
   formatPlannerDate,
@@ -34,6 +41,7 @@ import type {
   DailyProgress,
   PlannerTask,
   TaskCategory,
+  WaitingItem,
 } from "@/lib/planner/types";
 
 type ConnectionMode = "connected" | "preview";
@@ -42,25 +50,22 @@ type PlannerDashboardProps = {
   connectionMode: ConnectionMode;
   initialProgress: DailyProgress[];
   initialTasks: PlannerTask[];
+  initialWaitingItems: WaitingItem[];
   ownerId: string;
   today: string;
-};
-
-const categoryStyles: Record<TaskCategory, string> = {
-  work: "bg-blue-50 text-blue-700 dark:bg-blue-400/10 dark:text-blue-200",
-  personal:
-    "bg-emerald-50 text-emerald-700 dark:bg-emerald-400/10 dark:text-emerald-200",
-  other: "bg-slate-100 text-slate-600 dark:bg-white/8 dark:text-slate-300",
 };
 
 export function PlannerDashboard({
   connectionMode,
   initialProgress,
   initialTasks,
+  initialWaitingItems,
   ownerId,
   today,
 }: PlannerDashboardProps) {
   const [tasks, setTasks] = useState(() => sortTasks(initialTasks));
+  const [waitingItems, setWaitingItems] = useState(initialWaitingItems);
+  const [activeList, setActiveList] = useState<"today" | "waiting">("today");
   const [progressByDate, setProgressByDate] = useState<
     Record<string, DailyProgress>
   >(() => indexProgress(initialProgress));
@@ -102,6 +107,9 @@ export function PlannerDashboard({
   const pendingDeleteTask = displayedTasks.find(
     (task) => task.id === pendingDeleteId,
   );
+  const dueWaitingItems = waitingItems.filter(
+    (item) => item.next_check_date && item.next_check_date <= today,
+  ).length;
 
   const displayedProgressByDate = useMemo(
     () => ({
@@ -133,8 +141,10 @@ export function PlannerDashboard({
     const snapshot = (await response.json()) as {
       progress: DailyProgress[];
       tasks: PlannerTask[];
+      waitingItems: WaitingItem[];
     };
     setTasks(sortTasks(snapshot.tasks));
+    setWaitingItems(snapshot.waitingItems);
     setProgressByDate((current) => ({
       ...current,
       ...indexProgress(snapshot.progress),
@@ -232,6 +242,7 @@ export function PlannerDashboard({
       category,
       due_time: dueTime || null,
       note: note.trim(),
+      related_url: "",
       is_completed: false,
       completed_at: null,
       sort_order: Math.max(0, ...displayedTasks.map((task) => task.sort_order)) + 10,
@@ -251,6 +262,7 @@ export function PlannerDashboard({
           dueTime: newTask.due_time,
           id: newTask.id,
           note: newTask.note,
+          relatedUrl: newTask.related_url,
           sortOrder: newTask.sort_order,
           taskDate: newTask.task_date,
           title: newTask.title,
@@ -389,6 +401,16 @@ export function PlannerDashboard({
     cancelEditing();
   }
 
+  function handleEditKeyDown(
+    event: ReactKeyboardEvent<HTMLInputElement>,
+    taskId: string,
+  ) {
+    if (event.key !== "Enter" || event.nativeEvent.isComposing) return;
+
+    event.preventDefault();
+    void saveTaskEdit(taskId);
+  }
+
   async function deleteTask(taskId: string) {
     const previousTasks = displayedTasks;
     const currentTask = displayedTasks.find((task) => task.id === taskId);
@@ -422,6 +444,7 @@ export function PlannerDashboard({
     const requestId = selectedDateRequestId.current + 1;
     selectedDateRequestId.current = requestId;
     setSelectedDate(date);
+    setActiveList("today");
     cancelEditing();
 
     if (date === today) {
@@ -474,7 +497,21 @@ export function PlannerDashboard({
     void loadMonth(nextMonth);
   }
 
+  function handleWaitingItemConverted(task: PlannerTask) {
+    setTasks((current) => sortTasks([...current, task]));
+    setSelectedDate(today);
+    setSelectedDateTasks([]);
+    setActiveList("today");
+    void loadMonth(today.slice(0, 7));
+  }
+
   const selectedProgress = displayedProgressByDate[selectedDate];
+  const selectedTotalTasks = selectedProgress?.total_tasks ?? 0;
+  const selectedCompletedTasks = selectedProgress?.completed_tasks ?? 0;
+  const selectedAchievementRate = selectedProgress?.achievement_rate ?? 0;
+  const achievementLabel = isTodaySelected
+    ? "오늘의 달성률"
+    : `${formatKoreanDate(selectedDate)} 달성률`;
 
   return (
     <main className="min-h-screen bg-[#f4f7fb] text-slate-950 dark:bg-slate-950 dark:text-white">
@@ -510,21 +547,44 @@ export function PlannerDashboard({
         </div>
 
         <div className="mb-7 mt-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
-          <div>
+          <div key={`planner-heading-${activeList}`} className={styles.headingTransition}>
             <h1 className="text-3xl font-black tracking-normal sm:text-4xl">
-              {formatPlannerDate(selectedDate)} 할 일 목록
+              {activeList === "today"
+                ? `${formatPlannerDate(selectedDate)} 할 일 목록`
+                : "대기·모니터링"}
             </h1>
             <span className="mt-4 block h-1 w-12 rounded-full bg-blue-600 dark:bg-blue-300" />
             <p className="mt-4 text-sm font-medium text-slate-500 dark:text-slate-400">
-              {isTodaySelected
-                ? "오늘 해야 할 일을 기록하고 완료 상태를 관리합니다."
-                : `${formatKoreanDate(selectedDate)} 할 일을 기록하고 관리합니다.`}
+              {activeList === "waiting"
+                ? "외부 조건을 기다리는 항목을 달성률과 분리해 관리합니다."
+                : isTodaySelected
+                  ? "오늘 해야 할 일을 기록하고 완료 상태를 관리합니다."
+                  : `${formatKoreanDate(selectedDate)} 할 일을 기록하고 관리합니다.`}
             </p>
           </div>
-          <div className="flex items-center gap-3 text-sm font-bold text-slate-500 dark:text-slate-400">
-            <span>{displayedCompletedTasks} 완료</span>
-            <span className="h-4 w-px bg-slate-300 dark:bg-white/15" />
-            <span>{displayedTasks.length} 전체</span>
+          <div
+            key={`planner-stats-${activeList}`}
+            className={`${styles.headingTransition} flex items-center gap-3 text-sm font-bold text-slate-500 dark:text-slate-400`}
+          >
+            {activeList === "today" ? (
+              <>
+                <span>{displayedCompletedTasks} 완료</span>
+                <span className="h-4 w-px bg-slate-300 dark:bg-white/15" />
+                <span>{displayedTasks.length} 전체</span>
+              </>
+            ) : (
+              <>
+                {dueWaitingItems ? (
+                  <>
+                    <span className="text-amber-700 dark:text-amber-300">
+                      {dueWaitingItems} 확인 예정
+                    </span>
+                    <span className="h-4 w-px bg-slate-300 dark:bg-white/15" />
+                  </>
+                ) : null}
+                <span>{waitingItems.length} 전체</span>
+              </>
+            )}
           </div>
         </div>
 
@@ -536,6 +596,60 @@ export function PlannerDashboard({
 
         <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1.55fr)_minmax(360px,0.75fr)]">
           <section className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-[0_18px_50px_rgba(15,23,42,0.06)] dark:border-white/10 dark:bg-slate-900">
+            <div
+              className="flex border-b border-slate-200 bg-white p-2 dark:border-white/10 dark:bg-slate-900"
+              role="tablist"
+              aria-label="Planner 목록"
+            >
+              <button
+                type="button"
+                role="tab"
+                id="planner-tab-today"
+                aria-controls="planner-panel-today"
+                aria-selected={activeList === "today"}
+                onClick={() => setActiveList("today")}
+                className={`inline-flex h-10 flex-1 items-center justify-center gap-2 rounded-md px-3 text-sm font-extrabold transition sm:flex-none ${
+                  activeList === "today"
+                    ? "bg-blue-600 text-white shadow-sm"
+                    : "text-slate-500 hover:bg-slate-100 hover:text-slate-800 dark:text-slate-400 dark:hover:bg-white/8 dark:hover:text-white"
+                }`}
+              >
+                <ListTodo className="h-4 w-4" aria-hidden="true" />
+                오늘 할 일
+                <span className={`rounded px-1.5 py-0.5 text-[10px] ${activeList === "today" ? "bg-white/15" : "bg-slate-100 dark:bg-white/8"}`}>
+                  {displayedTasks.length}
+                </span>
+              </button>
+              <button
+                type="button"
+                role="tab"
+                id="planner-tab-waiting"
+                aria-controls="planner-panel-waiting"
+                aria-selected={activeList === "waiting"}
+                onClick={() => setActiveList("waiting")}
+                className={`inline-flex h-10 flex-1 items-center justify-center gap-2 rounded-md px-3 text-sm font-extrabold transition sm:flex-none ${
+                  activeList === "waiting"
+                    ? "bg-blue-600 text-white shadow-sm"
+                    : "text-slate-500 hover:bg-slate-100 hover:text-slate-800 dark:text-slate-400 dark:hover:bg-white/8 dark:hover:text-white"
+                }`}
+              >
+                <RadioTower className="h-4 w-4" aria-hidden="true" />
+                대기·모니터링
+                <span className={`rounded px-1.5 py-0.5 text-[10px] ${activeList === "waiting" ? "bg-white/15" : "bg-slate-100 dark:bg-white/8"}`}>
+                  {waitingItems.length}
+                </span>
+              </button>
+            </div>
+
+            {activeList === "today" ? (
+              <div
+                key={`planner-panel-today-${selectedDate}`}
+                id="planner-panel-today"
+                role="tabpanel"
+                aria-labelledby="planner-tab-today"
+                className={styles.listTransition}
+              >
+                <div className={styles.listTransitionContent}>
             <form
               onSubmit={addTask}
               className="grid gap-3 border-b border-slate-200 bg-slate-50/80 p-4 md:grid-cols-[minmax(220px,1fr)_120px_116px_minmax(160px,0.7fr)_44px] dark:border-white/10 dark:bg-white/[0.03]"
@@ -551,21 +665,12 @@ export function PlannerDashboard({
                 placeholder="새 할 일을 입력하세요"
                 className="h-11 min-w-0 rounded-lg border border-slate-200 bg-white px-3 text-sm font-semibold outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/15 dark:border-white/10 dark:bg-slate-950 dark:placeholder:text-slate-500"
               />
-              <label className="sr-only" htmlFor="new-task-category">
-                카테고리
-              </label>
-              <select
-                id="new-task-category"
+              <CategoryPicker
+                ariaLabel="새 할 일 카테고리"
                 value={category}
-                onChange={(event) => setCategory(event.target.value as TaskCategory)}
-                className="h-11 rounded-lg border border-slate-200 bg-white px-3 text-sm font-bold outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/15 dark:border-white/10 dark:bg-slate-950"
-              >
-                {Object.entries(CATEGORY_LABELS).map(([value, label]) => (
-                  <option key={value} value={value}>
-                    {label}
-                  </option>
-                ))}
-              </select>
+                onChange={setCategory}
+                size="field"
+              />
               <label className="sr-only" htmlFor="new-task-time">
                 완료 예정 시간
               </label>
@@ -639,6 +744,7 @@ export function PlannerDashboard({
                       <input
                         value={editTitle}
                         onChange={(event) => setEditTitle(event.target.value)}
+                        onKeyDown={(event) => handleEditKeyDown(event, task.id)}
                         maxLength={200}
                         aria-label={`${task.title} 제목 수정`}
                         className="h-9 w-full rounded-md border border-blue-300 bg-white px-2 text-sm font-bold text-slate-900 outline-none ring-2 ring-blue-500/10 focus:border-blue-500 dark:border-blue-300/30 dark:bg-slate-950 dark:text-white"
@@ -656,20 +762,13 @@ export function PlannerDashboard({
 
                   <div className="flex items-center justify-between md:justify-center md:px-2">
                     <span className="text-xs font-bold text-slate-400 md:hidden">카테고리</span>
-                    <select
+                    <CategoryPicker
                       value={task.category}
-                      onChange={(event) =>
-                        updateCategory(task.id, event.target.value as TaskCategory)
+                      onChange={(nextCategory) =>
+                        void updateCategory(task.id, nextCategory)
                       }
-                      aria-label={`${task.title} 카테고리`}
-                      className={`h-8 rounded-md border-0 px-2 text-xs font-extrabold outline-none ring-1 ring-inset ring-current/10 ${categoryStyles[task.category]}`}
-                    >
-                      {Object.entries(CATEGORY_LABELS).map(([value, label]) => (
-                        <option key={value} value={value} className="bg-white text-slate-900">
-                          {label}
-                        </option>
-                      ))}
-                    </select>
+                      ariaLabel={`${task.title} 카테고리`}
+                    />
                   </div>
 
                   <div
@@ -689,6 +788,7 @@ export function PlannerDashboard({
                           type="time"
                           value={editDueTime}
                           onChange={(event) => setEditDueTime(event.target.value)}
+                          onKeyDown={(event) => handleEditKeyDown(event, task.id)}
                           aria-label={`${task.title} 예정 시간 수정`}
                           className="h-9 min-w-[86px] flex-1 rounded-md border border-blue-300 bg-white px-2 text-xs font-bold text-slate-900 outline-none focus:border-blue-500 dark:border-blue-300/30 dark:bg-slate-950 dark:text-white"
                         />
@@ -727,15 +827,30 @@ export function PlannerDashboard({
                       <input
                         value={editNote}
                         onChange={(event) => setEditNote(event.target.value)}
+                        onKeyDown={(event) => handleEditKeyDown(event, task.id)}
                         maxLength={500}
                         placeholder="비고"
                         aria-label={`${task.title} 비고 수정`}
                         className="h-9 w-full rounded-md border border-blue-300 bg-white px-2 text-sm font-medium text-slate-900 outline-none focus:border-blue-500 dark:border-blue-300/30 dark:bg-slate-950 dark:text-white"
                       />
                     ) : (
-                      <span className={`block max-w-full break-words text-right text-sm font-medium leading-5 [overflow-wrap:anywhere] md:text-left ${task.is_completed ? "line-through" : "text-slate-500 dark:text-slate-400"}`}>
-                        {task.note || "-"}
-                      </span>
+                      <div className="flex min-w-0 items-start justify-end gap-1.5 md:justify-start">
+                        <span className={`block min-w-0 max-w-full break-words text-right text-sm font-medium leading-5 [overflow-wrap:anywhere] md:text-left ${task.is_completed ? "line-through" : "text-slate-500 dark:text-slate-400"}`}>
+                          {task.note || "-"}
+                        </span>
+                        {task.related_url ? (
+                          <a
+                            href={task.related_url}
+                            target="_blank"
+                            rel="noreferrer"
+                            title="관련 링크 열기"
+                            className="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded text-blue-600 transition hover:bg-blue-50 dark:text-blue-300 dark:hover:bg-blue-400/10"
+                          >
+                            <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
+                            <span className="sr-only">{task.title} 관련 링크 열기</span>
+                          </a>
+                        ) : null}
+                      </div>
                     )}
                   </div>
 
@@ -793,9 +908,16 @@ export function PlannerDashboard({
               ))}
 
               {isLoadingSelectedDate && !isTodaySelected ? (
-                <div className="space-y-3 px-5 py-10" aria-label="선택 날짜 할 일 불러오는 중">
-                  <span className="block h-12 animate-pulse rounded-md bg-slate-100 dark:bg-white/6" />
-                  <span className="block h-12 animate-pulse rounded-md bg-slate-100 dark:bg-white/6" />
+                <div
+                  className="flex min-h-28 items-center justify-center gap-2 px-5 py-8 text-sm font-bold text-slate-500 dark:text-slate-400"
+                  role="status"
+                  aria-live="polite"
+                >
+                  <LoaderCircle
+                    className="h-4 w-4 animate-spin text-blue-600 dark:text-blue-300"
+                    aria-hidden="true"
+                  />
+                  <span>할 일 목록을 불러오는 중</span>
                 </div>
               ) : displayedTasks.length === 0 ? (
                 <div className="px-5 py-16 text-center">
@@ -808,6 +930,29 @@ export function PlannerDashboard({
                 </div>
               ) : null}
             </div>
+                </div>
+              </div>
+            ) : (
+              <div
+                key="planner-panel-waiting"
+                id="planner-panel-waiting"
+                role="tabpanel"
+                aria-labelledby="planner-tab-waiting"
+                className={styles.listTransition}
+              >
+                <div className={styles.listTransitionContent}>
+                  <WaitingItemsPanel
+                    connectionMode={connectionMode}
+                    items={waitingItems}
+                    onConverted={handleWaitingItemConverted}
+                    onError={setError}
+                    ownerId={ownerId}
+                    setItems={setWaitingItems}
+                    today={today}
+                  />
+                </div>
+              </div>
+            )}
           </section>
 
           <aside className="space-y-6">
@@ -815,28 +960,28 @@ export function PlannerDashboard({
               <div className="flex items-end justify-between gap-4">
                 <div>
                   <p className="text-xs font-extrabold uppercase text-slate-500 dark:text-slate-400">
-                    오늘의 달성률
+                    {achievementLabel}
                   </p>
                   <p className="mt-2 text-4xl font-extrabold text-slate-950 dark:text-white">
-                    {achievementRate}%
+                    {selectedAchievementRate}%
                   </p>
                 </div>
                 <div className="text-right text-sm font-bold text-slate-500 dark:text-slate-400">
-                  <p>{completedTasks} / {tasks.length}</p>
+                  <p>{selectedCompletedTasks} / {selectedTotalTasks}</p>
                   <p className="mt-1 text-xs">완료한 할 일</p>
                 </div>
               </div>
               <div
                 className="mt-5 h-3 overflow-hidden rounded-full bg-slate-100 dark:bg-white/8"
                 role="progressbar"
-                aria-label="오늘의 달성률"
+                aria-label={achievementLabel}
                 aria-valuemin={0}
                 aria-valuemax={100}
-                aria-valuenow={achievementRate}
+                aria-valuenow={selectedAchievementRate}
               >
                 <div
                   className="h-full rounded-full bg-emerald-500 transition-[width] duration-500 ease-out"
-                  style={{ width: `${achievementRate}%` }}
+                  style={{ width: `${selectedAchievementRate}%` }}
                 />
               </div>
             </section>

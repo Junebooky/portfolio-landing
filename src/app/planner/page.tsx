@@ -2,7 +2,10 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowLeft, Database } from "lucide-react";
 import { PlannerDashboard } from "@/components/planner/planner-dashboard";
-import { createPreviewTasks } from "@/lib/planner/constants";
+import {
+  createPreviewTasks,
+  createPreviewWaitingItems,
+} from "@/lib/planner/constants";
 import { getSeoulDateString } from "@/lib/planner/date";
 import { getPlannerSnapshot } from "@/lib/planner/service";
 import { isSupabaseAdminConfigured } from "@/lib/supabase/config";
@@ -25,6 +28,7 @@ export default async function PlannerPage() {
           connectionMode="preview"
           initialProgress={[]}
           initialTasks={createPreviewTasks(today)}
+          initialWaitingItems={createPreviewWaitingItems()}
           ownerId="local-preview"
           today={today}
         />
@@ -46,6 +50,7 @@ export default async function PlannerPage() {
       connectionMode="connected"
       initialProgress={result.snapshot.progress}
       initialTasks={result.snapshot.tasks}
+      initialWaitingItems={result.snapshot.waitingItems}
       ownerId={result.snapshot.ownerId}
       today={today}
     />

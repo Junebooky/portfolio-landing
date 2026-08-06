@@ -35,6 +35,9 @@ export async function POST(request: NextRequest) {
     const body = (await request.json()) as Record<string, unknown>;
     const title = typeof body.title === "string" ? body.title.trim() : "";
     const note = typeof body.note === "string" ? body.note.trim() : "";
+    const relatedUrl = typeof body.relatedUrl === "string"
+      ? body.relatedUrl.trim()
+      : "";
     const category = body.category as TaskCategory;
     const dueTime = typeof body.dueTime === "string" && body.dueTime
       ? body.dueTime
@@ -46,6 +49,7 @@ export async function POST(request: NextRequest) {
       !title ||
       title.length > 200 ||
       note.length > 500 ||
+      !isOptionalHttpUrl(relatedUrl) ||
       !categories.has(category) ||
       (dueTime !== null && !/^\d{2}:\d{2}$/.test(dueTime)) ||
       typeof body.sortOrder !== "number"
@@ -58,6 +62,7 @@ export async function POST(request: NextRequest) {
       dueTime,
       id: body.id,
       note,
+      relatedUrl,
       sortOrder: body.sortOrder,
       taskDate: body.taskDate,
       title,
@@ -175,6 +180,18 @@ function isUuid(value: unknown): value is string {
     typeof value === "string" &&
     /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value)
   );
+}
+
+function isOptionalHttpUrl(value: string) {
+  if (!value) return true;
+  if (value.length > 2048) return false;
+
+  try {
+    const url = new URL(value);
+    return url.protocol === "http:" || url.protocol === "https:";
+  } catch {
+    return false;
+  }
 }
 
 function forbidden() {

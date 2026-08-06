@@ -5,6 +5,7 @@ import type {
   DailyProgress,
   PlannerTask,
   TaskCategory,
+  WaitingItem,
 } from "@/lib/planner/types";
 import { createAdminClient } from "@/lib/supabase/admin";
 
@@ -13,10 +14,21 @@ type NewTaskInput = {
   dueTime: string | null;
   id: string;
   note: string;
+  relatedUrl: string;
   sortOrder: number;
   taskDate: string;
   title: string;
 };
+
+type NewWaitingItemInput = {
+  id: string;
+  nextCheckDate: string | null;
+  note: string;
+  relatedUrl: string;
+  title: string;
+};
+
+type WaitingItemUpdate = Omit<NewWaitingItemInput, "id">;
 
 type TaskUpdate = {
   category?: TaskCategory;
@@ -32,7 +44,7 @@ export async function getPlannerSnapshot(taskDate: string, monthKey: string) {
   const ownerId = await getPlannerOwnerId(admin);
   const { end, start } = getMonthRange(`${monthKey}-01`);
   const planner = admin.schema("planner");
-  const [tasksResult, progressResult] = await Promise.all([
+  const [tasksResult, progressResult, waitingResult] = await Promise.all([
     planner
       .from("tasks")
       .select("*")
@@ -47,9 +59,15 @@ export async function getPlannerSnapshot(taskDate: string, monthKey: string) {
       .gte("progress_date", start)
       .lte("progress_date", end)
       .order("progress_date"),
+    planner
+      .from("waiting_items")
+      .select("*")
+      .eq("owner_id", ownerId)
+      .order("next_check_date", { ascending: true, nullsFirst: false })
+      .order("created_at"),
   ]);
 
-  const error = tasksResult.error ?? progressResult.error;
+  const error = tasksResult.error ?? progressResult.error ?? waitingResult.error;
   if (error) throw new Error(error.message);
 
   const tasks = (tasksResult.data ?? []) as PlannerTask[];
@@ -61,6 +79,7 @@ export async function getPlannerSnapshot(taskDate: string, monthKey: string) {
     ownerId,
     progress: (progressResult.data ?? []) as DailyProgress[],
     tasks: visibleTasks,
+    waitingItems: (waitingResult.data ?? []) as WaitingItem[],
   };
 }
 
@@ -76,6 +95,7 @@ export async function createPlannerTask(input: NewTaskInput) {
       id: input.id,
       note: input.note,
       owner_id: ownerId,
+      related_url: input.relatedUrl,
       sort_order: input.sortOrder,
       task_date: input.taskDate,
       title: input.title,
@@ -85,6 +105,89 @@ export async function createPlannerTask(input: NewTaskInput) {
 
   if (result.error) throw new Error(result.error.message);
   return result.data as PlannerTask;
+}
+
+export async function createWaitingItem(input: NewWaitingItemInput) {
+  const admin = createAdminClient();
+  const ownerId = await getPlannerOwnerId(admin);
+  const result = await admin
+    .schema("planner")
+    .from("waiting_items")
+    .insert({
+      id: input.id,
+      next_check_date: input.nextCheckDate,
+      note: input.note,
+      owner_id: ownerId,
+      related_url: input.relatedUrl,
+      title: input.title,
+    })
+    .select("*")
+    .single();
+
+  if (result.error) throw new Error(result.error.message);
+  return result.data as WaitingItem;
+}
+
+export async function updateWaitingItem(
+  waitingItemId: string,
+  update: WaitingItemUpdate,
+) {
+  const admin = createAdminClient();
+  const ownerId = await getPlannerOwnerId(admin);
+  const result = await admin
+    .schema("planner")
+    .from("waiting_items")
+    .update({
+      next_check_date: update.nextCheckDate,
+      note: update.note,
+      related_url: update.relatedUrl,
+      title: update.title,
+    })
+    .eq("id", waitingItemId)
+    .eq("owner_id", ownerId)
+    .select("*")
+    .single();
+
+  if (result.error) throw new Error(result.error.message);
+  return result.data as WaitingItem;
+}
+
+export async function deleteWaitingItem(waitingItemId: string) {
+  const admin = createAdminClient();
+  const ownerId = await getPlannerOwnerId(admin);
+  const result = await admin
+    .schema("planner")
+    .from("waiting_items")
+    .delete()
+    .eq("id", waitingItemId)
+    .eq("owner_id", ownerId)
+    .select("id")
+    .single();
+
+  if (result.error) throw new Error(result.error.message);
+}
+
+export async function convertWaitingItem(input: {
+  category: TaskCategory;
+  dueTime: string | null;
+  taskId: string;
+  waitingItemId: string;
+}) {
+  const admin = createAdminClient();
+  const ownerId = await getPlannerOwnerId(admin);
+  const result = await admin.schema("planner").rpc("convert_waiting_item", {
+    requested_category: input.category,
+    requested_due_time: input.dueTime,
+    requested_owner_id: ownerId,
+    requested_task_date: getSeoulDateString(),
+    requested_task_id: input.taskId,
+    requested_waiting_id: input.waitingItemId,
+  });
+
+  if (result.error) throw new Error(result.error.message);
+  const task = Array.isArray(result.data) ? result.data[0] : result.data;
+  if (!task) throw new Error("전환된 할 일을 찾을 수 없습니다.");
+  return task as PlannerTask;
 }
 
 export async function updatePlannerTask(taskId: string, update: TaskUpdate) {

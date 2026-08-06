@@ -1,4 +1,8 @@
-import type { PlannerTask, TaskCategory } from "@/lib/planner/types";
+import type {
+  PlannerTask,
+  TaskCategory,
+  WaitingItem,
+} from "@/lib/planner/types";
 
 export const PLANNER_OWNER_EMAIL = "gotoward7@gmail.com";
 export const SEOUL_TIME_ZONE = "Asia/Seoul";
@@ -22,6 +26,7 @@ export function createPreviewTasks(taskDate: string): PlannerTask[] {
       category: "personal",
       due_time: null,
       note: "",
+      related_url: "",
       is_completed: false,
       completed_at: null,
       sort_order: 10,
@@ -37,9 +42,27 @@ export function createPreviewTasks(taskDate: string): PlannerTask[] {
       category: "personal",
       due_time: null,
       note: "",
+      related_url: "",
       is_completed: false,
       completed_at: null,
       sort_order: 20,
+      created_at: createdAt,
+      updated_at: createdAt,
+    },
+  ];
+}
+
+export function createPreviewWaitingItems(): WaitingItem[] {
+  const createdAt = new Date().toISOString();
+
+  return [
+    {
+      id: "preview-waiting-application",
+      owner_id: "local-preview",
+      title: "수급자격 신청서 인터넷 제출",
+      next_check_date: null,
+      note: "온라인 제출 가능 여부를 주기적으로 확인",
+      related_url: "",
       created_at: createdAt,
       updated_at: createdAt,
     },

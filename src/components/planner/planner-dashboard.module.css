@@ -1,0 +1,49 @@
+.headingTransition {
+  animation: heading-enter 180ms ease-out both;
+}
+
+.listTransition {
+  display: grid;
+  grid-template-rows: 1fr;
+  overflow: hidden;
+  transform-origin: top center;
+  animation: list-expand 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.listTransitionContent {
+  min-height: 0;
+  overflow: hidden;
+}
+
+@keyframes heading-enter {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes list-expand {
+  from {
+    grid-template-rows: 0fr;
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+
+  to {
+    grid-template-rows: 1fr;
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .headingTransition,
+  .listTransition {
+    animation: none;
+  }
+}

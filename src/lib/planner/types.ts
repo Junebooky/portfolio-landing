@@ -9,9 +9,21 @@ export interface PlannerTask {
   category: TaskCategory;
   due_time: string | null;
   note: string;
+  related_url: string;
   is_completed: boolean;
   completed_at: string | null;
   sort_order: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface WaitingItem {
+  id: string;
+  owner_id: string;
+  title: string;
+  next_check_date: string | null;
+  note: string;
+  related_url: string;
   created_at: string;
   updated_at: string;
 }
