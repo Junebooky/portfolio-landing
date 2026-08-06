@@ -58,8 +58,8 @@ export function CountUpNumber({
         requestAnimationFrame(animate);
       },
       {
-        rootMargin: "0px 0px 80% 0px",
-        threshold: 0.1,
+        rootMargin: "0px 0px -12% 0px",
+        threshold: 0.25,
       },
     );
 

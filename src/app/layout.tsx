@@ -15,16 +15,23 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "윤태준(YUN TAE JUN) | Full-stack Developer & Designer",
   description:
-    "문제 해결을 설계하고 가치를 만드는 Full-stack Developer & Designer 포트폴리오",
+    "기획, 디자인, 풀스택 개발, 산업·경제 리서치를 연결해 비즈니스 가치로 확장하는 포트폴리오",
   metadataBase: new URL("https://portfolio-landing-chi-six.vercel.app"),
   icons: {
-    icon: "/favicon_v1.png",
-    apple: "/favicon_v1.png",
+    icon: [
+      {
+        url: "/favicon_v1.png?v=20260806",
+        type: "image/png",
+        sizes: "512x512",
+      },
+    ],
+    shortcut: "/favicon_v1.png?v=20260806",
+    apple: "/favicon_v1.png?v=20260806",
   },
   openGraph: {
     title: "윤태준(YUN TAE JUN) | Full-stack Developer & Designer",
     description:
-      "사용자 중심의 디자인과 견고한 기술로 비즈니스 가치를 연결하는 포트폴리오",
+      "기획, 디자인, 풀스택 개발, 산업·경제 리서치를 연결해 비즈니스 가치로 확장하는 포트폴리오",
     url: "https://portfolio-landing-chi-six.vercel.app",
     images: ["/favicon_v1.png"],
     type: "website",

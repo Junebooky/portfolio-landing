@@ -1,28 +1,50 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Building2, Landmark, MapPin, Mountain, Route } from "lucide-react";
+import {
+  Building2,
+  Compass,
+  Landmark,
+  MapPin,
+  Mountain,
+  Route,
+} from "lucide-react";
 
 const travelSlides = [
   {
     label: "Himalaya",
     src: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1200&q=80",
+    title: "Himalaya Trek",
+    body: "히말라야 트레킹을 통해 자연과 사람, 지역 생태계의 연결을 관찰",
+    icon: Mountain,
   },
   {
     label: "India",
     src: "https://images.unsplash.com/photo-1524492412937-b28074a5d7da?auto=format&fit=crop&w=1200&q=80",
+    title: "India Journey",
+    body: "인도 도시와 시장, 거리에서 산업과 문화의 역동성을 체험",
+    icon: Landmark,
   },
   {
     label: "Pilgrimage Route",
     src: "https://images.unsplash.com/photo-1544735716-392fe2489ffa?auto=format&fit=crop&w=1200&q=80",
+    title: "Pilgrimage Route",
+    body: "순례의 길 위에서 이동의 의미와 지역 경제의 흐름을 이해",
+    icon: Route,
   },
   {
     label: "Desert City",
     src: "https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=1200&q=80",
+    title: "Desert City Walk",
+    body: "낯선 도시의 거리와 상권에서 생활 방식과 소비의 맥락을 기록",
+    icon: Building2,
   },
   {
     label: "Field Notes",
     src: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1200&q=80",
+    title: "Field Notes",
+    body: "이동하며 본 장면을 산업, 기업, 사용자 관점의 메모로 축적",
+    icon: Compass,
   },
 ];
 
@@ -34,26 +56,12 @@ const slidePositions = [
   "-left-[82%] top-[8%] z-10 h-[280px] w-[66%] opacity-0 scale-90 lg:-left-[44%] lg:top-[8%] lg:h-[306px] lg:w-[38%]",
 ];
 
-const travelHighlights = [
-  {
-    title: "Himalaya Trek",
-    body: "히말라야 트레킹을 통해 자연과 사람, 지역 생태계의 연결을 관찰",
-    icon: Mountain,
-  },
-  {
-    title: "India Journey",
-    body: "인도 도시와 시장, 거리에서 산업과 문화의 역동성을 체험",
-    icon: Landmark,
-  },
-  {
-    title: "Pilgrimage Route",
-    body: "순례의 길 위에서 이동의 의미와 지역 경제의 흐름을 이해",
-    icon: Route,
-  },
-];
-
 export function TravelImageSlider() {
   const [activeIndex, setActiveIndex] = useState(0);
+  const activeHighlights = [0, 1, 2].map(
+    (offset) => travelSlides[(activeIndex + offset) % travelSlides.length],
+  );
+  const activeSlide = travelSlides[activeIndex];
 
   useEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
@@ -95,11 +103,11 @@ export function TravelImageSlider() {
         })}
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-3">
-        {travelHighlights.map((item) => (
+      <div className="hidden gap-4 sm:grid sm:grid-cols-3">
+        {activeHighlights.map((item) => (
           <article
             key={item.title}
-            className="grid grid-cols-[auto_1fr] gap-4 border border-white/16 bg-white/[0.06] p-5 shadow-[0_18px_50px_rgba(2,6,23,0.24)] backdrop-blur-md"
+            className="grid grid-cols-[auto_1fr] gap-4 border border-white/16 bg-white/[0.06] p-5 shadow-[0_18px_50px_rgba(2,6,23,0.24)] backdrop-blur-md transition duration-500"
           >
             <span className="mt-1 grid h-10 w-10 place-items-center rounded-lg border border-white/14 bg-white/[0.06] text-blue-100">
               <item.icon className="h-6 w-6" strokeWidth={1.7} aria-hidden="true" />
@@ -115,6 +123,24 @@ export function TravelImageSlider() {
           </article>
         ))}
       </div>
+
+      <article className="grid grid-cols-[auto_1fr] gap-4 border border-white/16 bg-white/[0.07] p-5 shadow-[0_18px_50px_rgba(2,6,23,0.24)] backdrop-blur-md sm:hidden">
+        <span className="mt-1 grid h-10 w-10 place-items-center rounded-lg border border-white/14 bg-white/[0.06] text-blue-100">
+          <activeSlide.icon
+            className="h-6 w-6"
+            strokeWidth={1.7}
+            aria-hidden="true"
+          />
+        </span>
+        <span>
+          <span className="block text-lg font-black text-white">
+            {activeSlide.title}
+          </span>
+          <span className="mt-2 block break-keep text-sm font-semibold leading-6 text-slate-200">
+            {activeSlide.body}
+          </span>
+        </span>
+      </article>
 
       <div className="pointer-events-none absolute right-8 top-6 hidden items-center gap-2 rounded-full border border-white/15 bg-white/8 px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-blue-100 backdrop-blur lg:inline-flex">
         <Building2 className="h-4 w-4" aria-hidden="true" />

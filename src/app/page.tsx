@@ -5,6 +5,7 @@ import type { LucideIcon } from "lucide-react";
 import {
   ArrowRight,
   BarChart3,
+  Bot,
   BookOpen,
   BookMarked,
   CalendarDays,
@@ -13,7 +14,6 @@ import {
   FileSpreadsheet,
   FileText,
   Folder,
-  Landmark,
   Mail,
   MapPin,
   Newspaper,
@@ -36,7 +36,11 @@ const contact = {
   blog: "https://blog.naver.com/junebooky",
 };
 
-const navItems = [
+const navItems: Array<{
+  label: string;
+  href: string;
+  icon?: LucideIcon;
+}> = [
   { label: "Home", href: "#home" },
   { label: "About", href: "#about" },
   { label: "Projects", href: "#projects" },
@@ -67,38 +71,69 @@ const socialLinks: Array<{
   { label: "Email", href: `mailto:${contact.email}`, lucideIcon: Mail },
 ];
 
-const valueCards: Array<{
-  title: string;
-  description: string[];
+const experienceImageBaseUrl =
+  "https://rvaowhriekibxtcpyalu.supabase.co/storage/v1/object/public/portfolio-landing/experience_sector";
+
+const experienceCards = [
+  {
+    number: "01",
+    title: "Full-stack 개발",
+    subtitle: "React · Next.js · API · DB",
+    image: `${experienceImageBaseUrl}/1.jpg`,
+  },
+  {
+    number: "02",
+    title: "UI/UX 디자인",
+    subtitle: "Figma · UX Flow · Prototyping",
+    image: `${experienceImageBaseUrl}/2.jpg`,
+  },
+  {
+    number: "03",
+    title: "산업·경제 리서치",
+    subtitle: "기업 2,000+ 트래킹 · 보고서 분석",
+    image: `${experienceImageBaseUrl}/3.jpg`,
+  },
+  {
+    number: "04",
+    title: "BTL 행사 운영",
+    subtitle: "현장운영, 팀리딩, 실행총괄",
+    image: `${experienceImageBaseUrl}/4.jpg`,
+  },
+  {
+    number: "05",
+    title: "콘텐츠 · 미디어",
+    subtitle: "기사 · 영상 · 채널 운영 경험",
+    image: `${experienceImageBaseUrl}/5.jpg`,
+  },
+  {
+    number: "06",
+    title: "기획 · IR · 문서화",
+    subtitle: "제안서 · IR 자료 · 협업 커뮤니케이션",
+    image: `${experienceImageBaseUrl}/6.jpg`,
+  },
+];
+
+const capabilityRail: Array<{
+  label: string;
   icon: LucideIcon;
 }> = [
-  {
-    title: "Full-stack 개발자",
-    icon: Code2,
-    description: [
-      "웹 서비스 기획, 설계, 개발 및 운영 경험",
-      "React, Node.js 기반의 서비스 구축",
-      "데이터베이스 설계 및 API 개발",
-    ],
-  },
-  {
-    title: "디자이너",
-    icon: Palette,
-    description: [
-      "사용자 중심의 UI/UX 설계 및 디자인",
-      "프로토타이핑 및 사용자 테스트",
-      "디자인 시스템 구축 및 일관성 관리",
-    ],
-  },
-  {
-    title: "산업부 / 경제부 경험",
-    icon: Landmark,
-    description: [
-      "산업/경제 데이터 분석 및 인사이트 도출",
-      "정책, 시장 동향 리서치 및 보고서 작성",
-      "이해관계자 커뮤니케이션 및 협업 경험",
-    ],
-  },
+  { label: "개발", icon: Code2 },
+  { label: "디자인", icon: Palette },
+  { label: "분석", icon: BarChart3 },
+  { label: "미디어", icon: Newspaper },
+  { label: "자동화", icon: Bot },
+];
+
+const aboutProfileImage =
+  "https://rvaowhriekibxtcpyalu.supabase.co/storage/v1/object/public/portfolio-landing/about_me/profile_v4.png";
+
+const worldMapImage =
+  "https://rvaowhriekibxtcpyalu.supabase.co/storage/v1/object/public/portfolio-landing/world_map/world_map.jpg";
+
+const aboutPills = [
+  "기술 × 디자인 융합",
+  "산업 이해 기반",
+  "비즈니스 가치 창출",
 ];
 
 const insightCards: Array<{
@@ -140,6 +175,7 @@ const skillGroups = [
       { name: "React", icon: "/icons/react.svg" },
       { name: "TypeScript", icon: "/icons/typescript.svg" },
       { name: "Next.js", icon: "/icons/nextjs.svg" },
+      { name: "Vue.js", icon: "/icons/vuejs.svg" },
       { name: "Tailwind CSS", icon: "/icons/tailwindcss.svg" },
     ],
   },
@@ -148,7 +184,10 @@ const skillGroups = [
     items: [
       { name: "Node.js", icon: "/icons/nodejs.svg" },
       { name: "Express", icon: "/icons/express.svg" },
+      { name: "Prisma", icon: "/icons/prisma.svg" },
       { name: "Python", icon: "/icons/python.svg" },
+      { name: "FastAPI", icon: "/icons/fastapi.svg" },
+      { name: "Django", icon: "/icons/django.svg" },
       { name: "REST API", icon: "/icons/openapi.svg" },
     ],
   },
@@ -207,12 +246,37 @@ const stats: Array<{
   label: string;
   value: number;
   suffix: string;
+  description: string;
   icon: LucideIcon;
 }> = [
-  { label: "경력", value: 5, suffix: "+", icon: CalendarDays },
-  { label: "프로젝트", value: 15, suffix: "+", icon: FileText },
-  { label: "협업/이해관계자", value: 20, suffix: "+", icon: UsersRound },
-  { label: "책임감과 실행력", value: 100, suffix: "%", icon: Star },
+  {
+    label: "실전 경험",
+    value: 5,
+    suffix: "+",
+    description: "다양한 산업의 실무 경험",
+    icon: CalendarDays,
+  },
+  {
+    label: "프로젝트",
+    value: 15,
+    suffix: "+",
+    description: "기획부터 개발까지 수행",
+    icon: FileText,
+  },
+  {
+    label: "협업 · 이해관계자",
+    value: 20,
+    suffix: "+",
+    description: "원활한 커뮤니케이션 경험",
+    icon: UsersRound,
+  },
+  {
+    label: "책임감 · 실행력",
+    value: 100,
+    suffix: "%",
+    description: "끝까지 완수하는 실행력",
+    icon: Star,
+  },
 ];
 
 export default function Home() {
@@ -245,20 +309,25 @@ function Header() {
           aria-label="Primary navigation"
           className="hidden items-center gap-8 text-sm font-semibold text-slate-600 lg:flex dark:text-slate-300"
         >
-          {navItems.map((item, index) => (
-            <a
-              key={item.href}
-              href={item.href}
-              className={`relative transition hover:text-blue-600 dark:hover:text-blue-300 ${
-                index === 0 ? "text-blue-600 dark:text-blue-300" : ""
-              }`}
-            >
-              {item.label}
-              {index === 0 ? (
-                <span className="absolute -bottom-3 left-1/2 h-1 w-5 -translate-x-1/2 rounded-full bg-blue-600" />
-              ) : null}
-            </a>
-          ))}
+          {navItems.map((item, index) => {
+            const Icon = item.icon;
+
+            return (
+              <a
+                key={item.href}
+                href={item.href}
+                className={`relative inline-flex items-center gap-1.5 transition hover:text-blue-600 dark:hover:text-blue-300 ${
+                  index === 0 ? "text-blue-600 dark:text-blue-300" : ""
+                }`}
+              >
+                {Icon ? <Icon className="h-3.5 w-3.5" aria-hidden="true" /> : null}
+                {item.label}
+                {index === 0 ? (
+                  <span className="absolute -bottom-3 left-1/2 h-1 w-5 -translate-x-1/2 rounded-full bg-blue-600" />
+                ) : null}
+              </a>
+            );
+          })}
         </nav>
         <div className="flex items-center gap-3">
           <a
@@ -279,26 +348,25 @@ function HeroSection() {
   return (
     <section
       id="home"
-      className="relative mx-auto grid max-w-7xl scroll-mt-24 gap-10 px-5 pb-2 pt-12 sm:px-8 lg:min-h-[590px] lg:grid-cols-[1.02fr_0.98fr] lg:items-end lg:pt-8"
+      className="relative mx-auto grid min-h-[90svh] max-w-7xl scroll-mt-24 gap-10 px-5 pb-8 pt-12 sm:px-8 lg:grid-cols-[1.04fr_0.96fr] lg:items-center lg:pb-0 lg:pt-8"
     >
-      <div className="z-10 flex flex-col items-start pb-8 lg:pb-12">
+      <div className="z-10 flex flex-col items-start pb-8 lg:min-h-[calc(90svh-5rem)] lg:justify-center lg:pb-0">
         <p className="mb-5 text-lg font-bold text-slate-700 dark:text-slate-300">
           안녕하세요,
         </p>
-        <h1 className="max-w-3xl text-[38px] font-extrabold leading-[1.18] tracking-normal text-slate-950 sm:text-5xl lg:text-[52px] dark:text-white">
-          문제 해결을 설계하고
+        <h1 className="max-w-3xl break-keep text-[36px] font-extrabold leading-[1.18] tracking-normal text-slate-950 sm:text-5xl lg:text-[54px] dark:text-white">
+          AI 시대의 경쟁력은
           <br />
-          가치를 만드는
-          <span className="mt-3 block text-[30px] leading-tight sm:text-4xl lg:text-[43px]">
-            <span className="text-blue-600 dark:text-blue-400">
-              Full-stack
-            </span>{" "}
-            Developer & Designer
+          하나의 기술이 아니라,
+          <br />
+          <span className="text-blue-600 dark:text-blue-400">
+            연결하는 힘입니다.
           </span>
         </h1>
-        <p className="mt-8 max-w-2xl text-base font-medium leading-8 text-slate-600 sm:text-lg dark:text-slate-300">
-          사용자 중심의 디자인과 견고한 기술로 서비스를 만들고, 산업/경제
-          분야의 경험으로 비즈니스 가치를 연결합니다.
+        <p className="mt-8 max-w-2xl break-keep text-base font-medium leading-8 text-slate-600 sm:text-lg dark:text-slate-300">
+          저는 기획, 디자인, 풀스택 개발, 산업·경제 리서치를 연결해
+          문제를 정의하고, 서비스를 만들고, 비즈니스 가치로 확장하는
+          복합형 Full-stack Developer & Designer입니다.
         </p>
         <div className="mt-9 flex flex-col gap-4 sm:flex-row">
           <a
@@ -342,7 +410,7 @@ function HeroSection() {
           ))}
         </div>
       </div>
-      <div className="relative min-h-[460px] lg:min-h-[590px]">
+      <div className="relative min-h-[460px] lg:min-h-[calc(90svh-5rem)] lg:self-end">
         <div className="absolute inset-x-0 bottom-0 mx-auto h-px max-w-xl bg-slate-200 dark:bg-white/10" />
         <Image
           src="/person.svg"
@@ -351,7 +419,7 @@ function HeroSection() {
           height={827}
           priority
           unoptimized
-          className="absolute bottom-0 left-1/2 h-[108%] w-auto max-w-none -translate-x-1/2 object-contain object-bottom drop-shadow-[0_28px_46px_rgba(15,23,42,0.16)] sm:h-[112%] lg:left-[56%] lg:h-[116%]"
+          className="absolute bottom-0 left-1/2 h-[108%] w-auto max-w-none -translate-x-1/2 object-contain object-bottom drop-shadow-[0_28px_46px_rgba(15,23,42,0.16)] sm:h-[112%] lg:left-[56%] lg:h-[108%]"
         />
       </div>
     </section>
@@ -360,31 +428,79 @@ function HeroSection() {
 
 function ValueSection() {
   return (
-    <section id="experience" className="mx-auto max-w-7xl scroll-mt-24 px-5 sm:px-8">
-      <div className="grid gap-8 rounded-2xl border border-slate-200 bg-white/88 p-7 shadow-[0_20px_70px_rgba(15,23,42,0.08)] sm:p-10 lg:grid-cols-[0.8fr_1fr_1fr_1fr] dark:border-white/10 dark:bg-white/6">
-        <SectionLead
-          title="경험으로 증명하는 가치"
-          compact
-        />
-        {valueCards.map((card) => (
-          <article
-            key={card.title}
-            className="border-slate-200 lg:border-l lg:pl-10 dark:border-white/10"
-          >
-            <IconBadge icon={card.icon} />
-            <h3 className="mt-6 text-lg font-extrabold text-slate-950 dark:text-white">
-              {card.title}
-            </h3>
-            <ul className="mt-4 space-y-3 text-sm font-medium leading-6 text-slate-600 dark:text-slate-300">
-              {card.description.map((item) => (
-                <li key={item} className="flex gap-2">
-                  <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-slate-950 dark:bg-blue-300" />
-                  <span>{item}</span>
-                </li>
-              ))}
-            </ul>
-          </article>
-        ))}
+    <section
+      id="experience"
+      className="mx-auto max-w-[1560px] scroll-mt-24 px-5 sm:px-8"
+    >
+      <div className="relative overflow-hidden rounded-[28px] border border-slate-200 bg-white p-7 shadow-[0_28px_90px_rgba(15,23,42,0.08)] sm:p-10 lg:grid lg:grid-cols-[0.74fr_1.26fr] lg:gap-11 lg:p-12 dark:border-white/10 dark:bg-white/[0.04]">
+        <div className="pointer-events-none absolute left-[17%] top-[48%] hidden h-[360px] w-[360px] -translate-y-1/2 rounded-full border border-blue-100/80 lg:block dark:border-blue-300/10" />
+        <div className="pointer-events-none absolute left-[22%] top-[50%] hidden h-[230px] w-[230px] -translate-y-1/2 rounded-full border border-blue-100/70 lg:block dark:border-blue-300/10" />
+
+        <div className="relative flex min-h-[420px] flex-col justify-center">
+          <h2 className="max-w-xl break-keep text-[36px] font-black leading-[1.14] tracking-normal text-slate-950 sm:text-5xl lg:text-[54px] dark:text-white">
+            경험으로 증명한
+            <span className="mt-2 block text-blue-600 dark:text-blue-300">
+              복합 역량
+            </span>
+          </h2>
+          <p className="mt-7 max-w-lg break-keep text-base font-semibold leading-8 text-slate-600 sm:text-lg dark:text-slate-300">
+            개발, 디자인, 리서치, 미디어, 자동화를 하나의 결과물로
+            연결합니다
+          </p>
+          <span className="mt-8 flex items-center gap-3">
+            <span className="h-3 w-3 rounded-full bg-blue-600" />
+            <span className="h-px w-20 bg-blue-200" />
+          </span>
+
+          <div className="capability-comet mt-10 flex max-w-2xl flex-wrap items-center gap-3 rounded-[22px] border border-slate-200 bg-white/92 px-5 py-4 shadow-[0_18px_45px_rgba(15,23,42,0.07)] dark:border-white/10 dark:bg-white/[0.06]">
+            {capabilityRail.map((item, index) => (
+              <span
+                key={item.label}
+                className="relative z-10 inline-flex items-center gap-2 text-sm font-black text-slate-600 transition duration-300 hover:text-blue-700 dark:text-slate-200 dark:hover:text-blue-200"
+              >
+                <item.icon
+                  className="h-5 w-5 text-blue-600 dark:text-blue-300"
+                  strokeWidth={2}
+                  aria-hidden="true"
+                />
+                {item.label}
+                {index < capabilityRail.length - 1 ? (
+                  <span className="ml-2 text-slate-300 dark:text-slate-500">
+                    +
+                  </span>
+                ) : null}
+              </span>
+            ))}
+          </div>
+        </div>
+
+        <div className="relative mt-8 grid gap-4 sm:grid-cols-2 lg:mt-0 lg:grid-cols-3">
+          {experienceCards.map((card) => (
+            <article
+              key={card.number}
+              className="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-5 text-center shadow-[0_18px_46px_rgba(15,23,42,0.08)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_26px_70px_rgba(37,99,235,0.14)] dark:border-white/10 dark:bg-slate-950/60"
+            >
+              <span className="absolute left-5 top-5 z-10 rounded-lg bg-blue-600 px-2.5 py-1.5 text-sm font-black text-white shadow-[0_10px_28px_rgba(37,99,235,0.36)]">
+                {card.number}
+              </span>
+              <div className="relative aspect-[16/9] overflow-hidden rounded-xl bg-blue-50">
+                <Image
+                  src={card.image}
+                  alt=""
+                  fill
+                  sizes="(min-width: 1024px) 300px, (min-width: 640px) 45vw, 90vw"
+                  className="object-cover transition duration-500 group-hover:scale-[1.04]"
+                />
+              </div>
+              <h3 className="mt-5 break-keep text-2xl font-black leading-tight text-slate-950 dark:text-white">
+                {card.title}
+              </h3>
+              <p className="mt-2 break-keep text-base font-bold leading-7 text-slate-500 dark:text-slate-300">
+                {card.subtitle}
+              </p>
+            </article>
+          ))}
+        </div>
       </div>
     </section>
   );
@@ -432,7 +548,7 @@ function GlobalExperienceSection() {
       <div className="absolute inset-y-0 left-0 z-0 w-full bg-[#050b18] lg:w-[35.4%]" />
       <div className="absolute inset-y-0 left-0 right-0 lg:left-[35.4%]">
         <Image
-          src="/world_map.jpg"
+          src={worldMapImage}
           alt=""
           fill
           sizes="100vw"
@@ -582,39 +698,89 @@ function AboutSection() {
   return (
     <section
       id="about"
-      className="mx-auto grid max-w-7xl scroll-mt-24 gap-5 px-5 py-8 sm:px-8 lg:grid-cols-[0.85fr_2fr]"
+      className="mx-auto max-w-7xl scroll-mt-24 px-5 py-20 sm:px-8 lg:py-24"
     >
-      <div>
-        <SectionHeading title="About Me" />
-        <p className="mt-5 max-w-md text-base font-medium leading-8 text-slate-600 dark:text-slate-300">
-          기술과 디자인, 그리고 산업에 대한 이해를 바탕으로 사용자의 비즈니스
-          모두에게 가치를 만드는 개발을 합니다.
-        </p>
-        <a
-          href={contact.blog}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="mt-6 inline-flex h-11 items-center gap-2 rounded-lg border border-slate-300 px-4 text-sm font-extrabold text-slate-800 transition hover:border-blue-500 hover:text-blue-700 dark:border-white/15 dark:text-white dark:hover:border-blue-300 dark:hover:text-blue-200"
-        >
-          더 알아보기
-          <ArrowRight className="h-4 w-4" aria-hidden="true" />
-        </a>
+      <div className="flex items-center gap-4 text-sm font-black uppercase tracking-normal text-blue-600 dark:text-blue-300">
+        ABOUT ME
+        <span className="h-2 w-2 rounded-full bg-blue-600 dark:bg-blue-300" />
+        <span className="h-px w-24 bg-blue-200 dark:bg-blue-300/30" />
       </div>
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+
+      <div className="mt-8 grid items-center gap-12 lg:grid-cols-[0.88fr_1.12fr] lg:gap-16">
+        <div className="relative isolate min-h-[430px] overflow-visible sm:min-h-[520px]">
+          <div className="absolute left-1/2 top-[52%] h-[360px] w-[360px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-blue-50 shadow-[inset_0_0_80px_rgba(37,99,235,0.08)] sm:h-[520px] sm:w-[520px] dark:bg-blue-400/10" />
+          <Image
+            src={aboutProfileImage}
+            alt={`${contact.name} about profile portrait`}
+            width={600}
+            height={800}
+            className="relative z-10 mx-auto h-auto w-full max-w-[360px] object-contain mix-blend-multiply sm:max-w-[500px] dark:mix-blend-normal"
+            sizes="(min-width: 1024px) 42vw, 88vw"
+          />
+        </div>
+
+        <div>
+          <h2 className="text-[44px] font-black leading-none tracking-normal text-slate-950 sm:text-[70px] dark:text-white">
+            About Me
+          </h2>
+          <span className="mt-8 block h-1.5 w-16 rounded-full bg-blue-600 dark:bg-blue-300" />
+          <p className="mt-9 max-w-3xl break-keep text-[22px] font-medium leading-[1.75] text-slate-700 dark:text-slate-200">
+            기술과 디자인, 산업에 대한 깊은 이해를 바탕으로 사용자와
+            비즈니스의 니즈를 연결하고, 실질적인 가치를 만드는 서비스를{" "}
+            <span className="font-black text-blue-600 dark:text-blue-300">
+              기획·설계·개발
+            </span>
+            합니다.
+          </p>
+          <div className="mt-8 flex flex-wrap gap-4">
+            {aboutPills.map((pill) => (
+              <span
+                key={pill}
+                className="inline-flex h-12 items-center gap-3 rounded-full border border-blue-200 bg-white px-5 text-base font-bold text-slate-700 shadow-sm dark:border-blue-300/20 dark:bg-white/6 dark:text-slate-100"
+              >
+                <span className="h-3 w-3 rounded-full bg-blue-600 shadow-[0_0_18px_rgba(37,99,235,0.45)] dark:bg-blue-300" />
+                {pill}
+              </span>
+            ))}
+          </div>
+          <a
+            href={contact.blog}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-10 inline-flex h-16 items-center justify-center gap-4 rounded-xl bg-blue-600 px-9 text-lg font-extrabold text-white shadow-[0_20px_44px_rgba(37,99,235,0.28)] transition hover:-translate-y-0.5 hover:bg-blue-700 dark:bg-blue-400 dark:text-slate-950 dark:hover:bg-blue-300"
+          >
+            더 알아보기
+            <ArrowRight className="h-6 w-6" aria-hidden="true" />
+          </a>
+        </div>
+      </div>
+
+      <div className="mt-8 border-t border-slate-200 pt-10 dark:border-white/10">
+        <p className="text-sm font-black uppercase text-blue-600 dark:text-blue-300">
+          OVERVIEW
+        </p>
+        <h3 className="mt-4 break-keep text-2xl font-extrabold leading-snug text-slate-950 sm:text-3xl dark:text-white">
+          데이터 기반의 사고와 실행으로, 문제를 해결하고 성과를 만듭니다.
+        </h3>
+      </div>
+
+      <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
         {stats.map((stat) => (
           <article
             key={stat.label}
-            className="rounded-xl border border-slate-200 bg-white/90 p-6 text-center shadow-sm dark:border-white/10 dark:bg-white/6"
+            className="rounded-2xl border border-slate-200 bg-white/92 p-8 text-center shadow-[0_18px_46px_rgba(15,23,42,0.07)] dark:border-white/10 dark:bg-white/6"
           >
-            <stat.icon
-              className="mx-auto h-6 w-6 text-slate-600 dark:text-slate-300"
-              aria-hidden="true"
-            />
-            <p className="mt-5 text-4xl font-black tracking-normal text-slate-950 dark:text-white">
+            <span className="mx-auto grid h-14 w-14 place-items-center rounded-xl bg-blue-50 text-blue-600 dark:bg-blue-400/10 dark:text-blue-300">
+              <stat.icon className="h-7 w-7" aria-hidden="true" />
+            </span>
+            <p className="mt-6 text-5xl font-black tracking-normal text-blue-600 dark:text-blue-300">
               <CountUpNumber value={stat.value} suffix={stat.suffix} />
             </p>
-            <p className="mt-2 text-sm font-extrabold text-slate-600 dark:text-slate-300">
+            <p className="mt-3 text-lg font-extrabold text-slate-950 dark:text-white">
               {stat.label}
+            </p>
+            <p className="mt-6 text-sm font-medium leading-7 text-slate-600 dark:text-slate-300">
+              {stat.description}
             </p>
           </article>
         ))}
@@ -686,10 +852,10 @@ function SectionLead({
 }) {
   return (
     <div className={compact ? "pt-1" : ""}>
-      <h2 className="max-w-sm text-2xl font-extrabold leading-snug text-slate-950 sm:text-3xl dark:text-white">
-        {title}
+      <h2 className="flex max-w-sm items-start gap-2 text-2xl font-extrabold leading-snug text-slate-950 sm:text-3xl dark:text-white">
+        <span className="mt-3 h-2 w-2 shrink-0 rounded-full bg-blue-600 dark:bg-blue-300" />
+        <span>{title}</span>
       </h2>
-      <span className="mt-4 block h-2 w-2 rounded-full bg-blue-600 dark:bg-blue-300" />
     </div>
   );
 }
@@ -697,10 +863,10 @@ function SectionLead({
 function SectionHeading({ title }: { title: string }) {
   return (
     <div>
-      <h2 className="text-2xl font-extrabold text-slate-950 dark:text-white">
-        {title}
+      <h2 className="flex items-center gap-2 text-2xl font-extrabold text-slate-950 dark:text-white">
+        <span className="h-2 w-2 shrink-0 rounded-full bg-blue-600 dark:bg-blue-300" />
+        <span>{title}</span>
       </h2>
-      <span className="mt-3 block h-2 w-2 rounded-full bg-blue-600 dark:bg-blue-300" />
     </div>
   );
 }
@@ -724,14 +890,6 @@ function BrandIcon({
     >
       <path d={icon.path} />
     </svg>
-  );
-}
-
-function IconBadge({ icon: Icon }: { icon: LucideIcon }) {
-  return (
-    <span className="grid h-14 w-14 place-items-center rounded-xl bg-blue-50 text-blue-600 dark:bg-blue-400/10 dark:text-blue-300">
-      <Icon className="h-7 w-7" strokeWidth={2} aria-hidden="true" />
-    </span>
   );
 }
 
