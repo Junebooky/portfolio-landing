@@ -1,6 +1,6 @@
 import "server-only";
 import { PLANNER_OWNER_EMAIL } from "@/lib/planner/constants";
-import { getMonthRange } from "@/lib/planner/date";
+import { getMonthRange, getSeoulDateString } from "@/lib/planner/date";
 import type {
   DailyProgress,
   PlannerTask,
@@ -52,10 +52,15 @@ export async function getPlannerSnapshot(taskDate: string, monthKey: string) {
   const error = tasksResult.error ?? progressResult.error;
   if (error) throw new Error(error.message);
 
+  const tasks = (tasksResult.data ?? []) as PlannerTask[];
+  const visibleTasks = taskDate === getSeoulDateString()
+    ? tasks
+    : tasks.filter((task) => task.template_id === null || task.is_completed);
+
   return {
     ownerId,
     progress: (progressResult.data ?? []) as DailyProgress[],
-    tasks: (tasksResult.data ?? []) as PlannerTask[],
+    tasks: visibleTasks,
   };
 }
 

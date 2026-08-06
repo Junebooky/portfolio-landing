@@ -92,10 +92,16 @@ export function PlannerDashboard({
   const achievementRate = tasks.length
     ? Math.round((completedTasks / tasks.length) * 100)
     : 0;
-  const displayedSelectedDateTasks = selectedDate === today
+  const displayedTasks = selectedDate === today
     ? tasks
     : selectedDateTasks;
-  const pendingDeleteTask = tasks.find((task) => task.id === pendingDeleteId);
+  const displayedCompletedTasks = displayedTasks.filter(
+    (task) => task.is_completed,
+  ).length;
+  const isTodaySelected = selectedDate === today;
+  const pendingDeleteTask = displayedTasks.find(
+    (task) => task.id === pendingDeleteId,
+  );
 
   const displayedProgressByDate = useMemo(
     () => ({
@@ -210,30 +216,30 @@ export function PlannerDashboard({
   async function addTask(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const trimmedTitle = title.trim();
-    if (!trimmedTitle || isAdding) return;
+    if (!trimmedTitle || isAdding || isLoadingSelectedDate) return;
 
     setError("");
     setIsAdding(true);
 
-    const previousTasks = tasks;
+    const previousTasks = displayedTasks;
     const now = new Date().toISOString();
     const newTask: PlannerTask = {
       id: crypto.randomUUID(),
       owner_id: ownerId,
       template_id: null,
-      task_date: today,
+      task_date: selectedDate,
       title: trimmedTitle,
       category,
       due_time: dueTime || null,
       note: note.trim(),
       is_completed: false,
       completed_at: null,
-      sort_order: Math.max(0, ...tasks.map((task) => task.sort_order)) + 10,
+      sort_order: Math.max(0, ...displayedTasks.map((task) => task.sort_order)) + 10,
       created_at: now,
       updated_at: now,
     };
 
-    setTasks((current) => sortTasks([...current, newTask]));
+    updateDisplayedTasks((current) => sortTasks([...current, newTask]));
     setTitle("");
     setDueTime("");
     setNote("");
@@ -254,8 +260,10 @@ export function PlannerDashboard({
       });
 
       if (!response.ok) {
-        setTasks(previousTasks);
+        updateDisplayedTasks(() => previousTasks);
         setError("할 일을 추가하지 못했습니다.");
+      } else {
+        void loadMonth(newTask.task_date.slice(0, 7));
       }
     }
 
@@ -263,13 +271,13 @@ export function PlannerDashboard({
   }
 
   async function toggleTask(taskId: string) {
-    const previousTasks = tasks;
-    const currentTask = tasks.find((task) => task.id === taskId);
+    const previousTasks = displayedTasks;
+    const currentTask = displayedTasks.find((task) => task.id === taskId);
     if (!currentTask) return;
 
     const nextCompleted = !currentTask.is_completed;
     const completedAt = nextCompleted ? new Date().toISOString() : null;
-    setTasks((current) =>
+    updateDisplayedTasks((current) =>
       current.map((task) =>
         task.id === taskId
           ? { ...task, is_completed: nextCompleted, completed_at: completedAt }
@@ -286,14 +294,19 @@ export function PlannerDashboard({
     });
 
     if (!response.ok) {
-      setTasks(previousTasks);
+      updateDisplayedTasks(() => previousTasks);
       setError("완료 상태를 저장하지 못했습니다.");
+    } else {
+      void loadMonth(currentTask.task_date.slice(0, 7));
     }
   }
 
   async function updateCategory(taskId: string, nextCategory: TaskCategory) {
-    const previousTasks = tasks;
-    setTasks((current) =>
+    const previousTasks = displayedTasks;
+    const currentTask = displayedTasks.find((task) => task.id === taskId);
+    if (!currentTask) return;
+
+    updateDisplayedTasks((current) =>
       current.map((task) =>
         task.id === taskId ? { ...task, category: nextCategory } : task,
       ),
@@ -308,7 +321,7 @@ export function PlannerDashboard({
     });
 
     if (!response.ok) {
-      setTasks(previousTasks);
+      updateDisplayedTasks(() => previousTasks);
       setError("카테고리를 저장하지 못했습니다.");
     }
   }
@@ -332,12 +345,14 @@ export function PlannerDashboard({
     const trimmedTitle = editTitle.trim();
     if (!trimmedTitle || isSavingEdit) return;
 
-    const previousTasks = tasks;
+    const previousTasks = displayedTasks;
+    const currentTask = displayedTasks.find((task) => task.id === taskId);
+    if (!currentTask) return;
     const nextNote = editNote.trim();
     const nextDueTime = editDueTime || null;
     setIsSavingEdit(true);
     setError("");
-    setTasks((current) =>
+    updateDisplayedTasks((current) =>
       current.map((task) =>
         task.id === taskId
           ? {
@@ -363,7 +378,7 @@ export function PlannerDashboard({
       });
 
       if (!response.ok) {
-        setTasks(previousTasks);
+        updateDisplayedTasks(() => previousTasks);
         setError("할 일 수정을 저장하지 못했습니다.");
         setIsSavingEdit(false);
         return;
@@ -375,9 +390,12 @@ export function PlannerDashboard({
   }
 
   async function deleteTask(taskId: string) {
-    const previousTasks = tasks;
+    const previousTasks = displayedTasks;
+    const currentTask = displayedTasks.find((task) => task.id === taskId);
+    if (!currentTask) return;
+
     setIsDeleting(true);
-    setTasks((current) => current.filter((task) => task.id !== taskId));
+    updateDisplayedTasks((current) => current.filter((task) => task.id !== taskId));
 
     if (!isConnected) {
       setIsDeleting(false);
@@ -390,8 +408,10 @@ export function PlannerDashboard({
     });
 
     if (!response.ok) {
-      setTasks(previousTasks);
+      updateDisplayedTasks(() => previousTasks);
       setError("할 일을 삭제하지 못했습니다.");
+    } else {
+      void loadMonth(currentTask.task_date.slice(0, 7));
     }
 
     setIsDeleting(false);
@@ -402,6 +422,7 @@ export function PlannerDashboard({
     const requestId = selectedDateRequestId.current + 1;
     selectedDateRequestId.current = requestId;
     setSelectedDate(date);
+    cancelEditing();
 
     if (date === today) {
       setSelectedDateTasks([]);
@@ -415,6 +436,7 @@ export function PlannerDashboard({
     }
 
     setIsLoadingSelectedDate(true);
+    setSelectedDateTasks([]);
     const response = await fetch(
       `/api/planner?month=${date.slice(0, 7)}&date=${date}`,
       { cache: "no-store" },
@@ -432,6 +454,17 @@ export function PlannerDashboard({
     const snapshot = (await response.json()) as { tasks: PlannerTask[] };
     setSelectedDateTasks(sortTasks(snapshot.tasks));
     setIsLoadingSelectedDate(false);
+  }
+
+  function updateDisplayedTasks(
+    update: (current: PlannerTask[]) => PlannerTask[],
+  ) {
+    if (isTodaySelected) {
+      setTasks(update);
+      return;
+    }
+
+    setSelectedDateTasks(update);
   }
 
   function changeMonth(offset: number) {
@@ -479,17 +512,19 @@ export function PlannerDashboard({
         <div className="mb-7 mt-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
           <div>
             <h1 className="text-3xl font-black tracking-normal sm:text-4xl">
-              {formatPlannerDate(today)} 할 일 목록
+              {formatPlannerDate(selectedDate)} 할 일 목록
             </h1>
             <span className="mt-4 block h-1 w-12 rounded-full bg-blue-600 dark:bg-blue-300" />
             <p className="mt-4 text-sm font-medium text-slate-500 dark:text-slate-400">
-              오늘 해야 할 일을 기록하고 완료 상태를 관리합니다.
+              {isTodaySelected
+                ? "오늘 해야 할 일을 기록하고 완료 상태를 관리합니다."
+                : `${formatKoreanDate(selectedDate)} 할 일을 기록하고 관리합니다.`}
             </p>
           </div>
           <div className="flex items-center gap-3 text-sm font-bold text-slate-500 dark:text-slate-400">
-            <span>{completedTasks} 완료</span>
+            <span>{displayedCompletedTasks} 완료</span>
             <span className="h-4 w-px bg-slate-300 dark:bg-white/15" />
-            <span>{tasks.length} 전체</span>
+            <span>{displayedTasks.length} 전체</span>
           </div>
         </div>
 
@@ -555,7 +590,7 @@ export function PlannerDashboard({
               <button
                 type="submit"
                 title="할 일 추가"
-                disabled={!title.trim() || isAdding}
+                disabled={!title.trim() || isAdding || isLoadingSelectedDate}
                 className="inline-flex h-11 w-full items-center justify-center rounded-lg bg-blue-600 text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-45 md:w-11"
               >
                 <Plus className="h-5 w-5" aria-hidden="true" />
@@ -573,7 +608,7 @@ export function PlannerDashboard({
             </div>
 
             <div className="divide-y divide-slate-200 dark:divide-white/10">
-              {tasks.map((task) => (
+              {displayedTasks.map((task) => (
                 <div
                   key={task.id}
                   className={`grid gap-3 px-4 py-4 transition md:grid-cols-[48px_minmax(190px,1fr)_110px_220px_minmax(140px,0.7fr)_88px] md:items-center md:gap-0 ${
@@ -586,7 +621,7 @@ export function PlannerDashboard({
                     <span className="text-xs font-bold text-slate-400 md:hidden">완료</span>
                     <button
                       type="button"
-                      onClick={() => toggleTask(task.id)}
+                      onClick={() => void toggleTask(task.id)}
                       aria-label={`${task.title} ${task.is_completed ? "완료 취소" : "완료"}`}
                       aria-pressed={task.is_completed}
                       className={`inline-flex h-6 w-6 items-center justify-center rounded-md border transition ${
@@ -757,11 +792,18 @@ export function PlannerDashboard({
                 </div>
               ))}
 
-              {tasks.length === 0 ? (
+              {isLoadingSelectedDate && !isTodaySelected ? (
+                <div className="space-y-3 px-5 py-10" aria-label="선택 날짜 할 일 불러오는 중">
+                  <span className="block h-12 animate-pulse rounded-md bg-slate-100 dark:bg-white/6" />
+                  <span className="block h-12 animate-pulse rounded-md bg-slate-100 dark:bg-white/6" />
+                </div>
+              ) : displayedTasks.length === 0 ? (
                 <div className="px-5 py-16 text-center">
                   <Check className="mx-auto h-8 w-8 text-slate-300 dark:text-slate-600" aria-hidden="true" />
                   <p className="mt-3 text-sm font-bold text-slate-500 dark:text-slate-400">
-                    오늘 등록된 할 일이 없습니다.
+                    {isTodaySelected
+                      ? "오늘 등록된 할 일이 없습니다."
+                      : "선택한 날짜에 등록된 할 일이 없습니다."}
                   </p>
                 </div>
               ) : null}
@@ -882,58 +924,6 @@ export function PlannerDashboard({
                 </span>
               </div>
 
-              <div className="mt-4 border-t border-slate-200 pt-4 dark:border-white/10">
-                <div className="flex items-center justify-between gap-3">
-                  <p className="text-xs font-extrabold text-slate-700 dark:text-slate-200">
-                    선택 날짜 할 일
-                  </p>
-                  <span className="text-[11px] font-bold text-slate-400">
-                    {isLoadingSelectedDate ? "불러오는 중" : `${displayedSelectedDateTasks.length}개`}
-                  </span>
-                </div>
-
-                {isLoadingSelectedDate ? (
-                  <div className="mt-3 space-y-2" aria-label="선택 날짜 할 일 불러오는 중">
-                    <span className="block h-10 animate-pulse rounded-md bg-slate-100 dark:bg-white/6" />
-                    <span className="block h-10 animate-pulse rounded-md bg-slate-100 dark:bg-white/6" />
-                  </div>
-                ) : displayedSelectedDateTasks.length > 0 ? (
-                  <div className="mt-3 divide-y divide-slate-100 dark:divide-white/8">
-                    {displayedSelectedDateTasks.map((task) => (
-                      <div key={task.id} className="flex items-start gap-3 py-3 first:pt-0 last:pb-0">
-                        <span
-                          className={`mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-md border ${
-                            task.is_completed
-                              ? "border-emerald-600 bg-emerald-600 text-white"
-                              : "border-slate-300 text-transparent dark:border-white/20"
-                          }`}
-                        >
-                          <Check className="h-3.5 w-3.5" strokeWidth={3} aria-hidden="true" />
-                        </span>
-                        <div className="min-w-0 flex-1">
-                          <p
-                            className={`break-keep text-xs font-bold leading-5 ${
-                              task.is_completed
-                                ? "text-slate-400 line-through"
-                                : "text-slate-700 dark:text-slate-200"
-                            }`}
-                          >
-                            {task.title}
-                          </p>
-                          <p className="mt-1 text-[11px] font-semibold text-slate-400">
-                            {CATEGORY_LABELS[task.category]}
-                            {task.due_time ? ` · ${task.due_time.slice(0, 5)}` : ""}
-                          </p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="mt-3 rounded-md bg-slate-50 px-3 py-4 text-center text-xs font-semibold text-slate-400 dark:bg-white/[0.035]">
-                    등록된 할 일이 없습니다.
-                  </p>
-                )}
-              </div>
             </section>
           </aside>
         </div>
