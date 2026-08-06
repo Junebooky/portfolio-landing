@@ -598,7 +598,7 @@ export function PlannerDashboard({
               </button>
             </form>
 
-            <div className="hidden grid-cols-[48px_minmax(190px,1fr)_110px_220px_minmax(140px,0.7fr)_88px] border-b border-slate-200 bg-white px-4 py-3 text-center text-xs font-extrabold text-slate-500 md:grid dark:border-white/10 dark:bg-slate-900 dark:text-slate-400">
+            <div className="hidden grid-cols-[44px_minmax(150px,1fr)_88px_148px_minmax(160px,0.8fr)_76px] border-b border-slate-200 bg-white px-4 py-3 text-center text-xs font-extrabold text-slate-500 md:grid dark:border-white/10 dark:bg-slate-900 dark:text-slate-400">
               <span>완료</span>
               <span>할 일</span>
               <span>카테고리</span>
@@ -611,7 +611,7 @@ export function PlannerDashboard({
               {displayedTasks.map((task) => (
                 <div
                   key={task.id}
-                  className={`grid gap-3 px-4 py-4 transition md:grid-cols-[48px_minmax(190px,1fr)_110px_220px_minmax(140px,0.7fr)_88px] md:items-center md:gap-0 ${
+                  className={`grid gap-3 px-4 py-4 transition md:grid-cols-[44px_minmax(150px,1fr)_88px_148px_minmax(160px,0.8fr)_76px] md:items-center md:gap-0 ${
                     task.is_completed
                       ? "bg-slate-50/80 text-slate-400 dark:bg-white/[0.025] dark:text-slate-500"
                       : "bg-white hover:bg-blue-50/35 dark:bg-slate-900 dark:hover:bg-blue-400/[0.035]"
@@ -673,7 +673,7 @@ export function PlannerDashboard({
                   </div>
 
                   <div
-                    className={`text-sm font-semibold md:block md:px-3 md:text-center ${
+                    className={`min-w-0 text-sm font-semibold md:block md:px-2 md:text-center ${
                       editingTaskId === task.id
                         ? "flex flex-col items-stretch gap-2"
                         : "flex items-center justify-between"
@@ -681,7 +681,7 @@ export function PlannerDashboard({
                   >
                     <span className="text-xs font-bold text-slate-400 md:hidden">기한</span>
                     {editingTaskId === task.id ? (
-                      <div className="flex items-center justify-end gap-2 md:justify-center">
+                      <div className="flex flex-wrap items-center justify-end gap-1.5 md:justify-center">
                         <span className="shrink-0 whitespace-nowrap text-xs text-slate-500 dark:text-slate-400">
                           {formatKoreanDate(task.task_date)}
                         </span>
@@ -690,7 +690,7 @@ export function PlannerDashboard({
                           value={editDueTime}
                           onChange={(event) => setEditDueTime(event.target.value)}
                           aria-label={`${task.title} 예정 시간 수정`}
-                          className="h-9 min-w-0 flex-1 rounded-md border border-blue-300 bg-white px-2 text-xs font-bold text-slate-900 outline-none focus:border-blue-500 dark:border-blue-300/30 dark:bg-slate-950 dark:text-white"
+                          className="h-9 min-w-[86px] flex-1 rounded-md border border-blue-300 bg-white px-2 text-xs font-bold text-slate-900 outline-none focus:border-blue-500 dark:border-blue-300/30 dark:bg-slate-950 dark:text-white"
                         />
                         {editDueTime ? (
                           <button
@@ -716,10 +716,10 @@ export function PlannerDashboard({
                   </div>
 
                   <div
-                    className={`min-w-0 md:block md:px-3 md:text-center ${
+                    className={`min-w-0 md:block md:px-2 md:text-left ${
                       editingTaskId === task.id
                         ? "flex flex-col items-stretch gap-2"
-                        : "flex items-center justify-between"
+                        : "grid grid-cols-[auto_minmax(0,1fr)] items-start gap-4"
                     }`}
                   >
                     <span className="text-xs font-bold text-slate-400 md:hidden">비고</span>
@@ -733,13 +733,13 @@ export function PlannerDashboard({
                         className="h-9 w-full rounded-md border border-blue-300 bg-white px-2 text-sm font-medium text-slate-900 outline-none focus:border-blue-500 dark:border-blue-300/30 dark:bg-slate-950 dark:text-white"
                       />
                     ) : (
-                      <span className={`truncate text-sm font-medium ${task.is_completed ? "line-through" : "text-slate-500 dark:text-slate-400"}`}>
+                      <span className={`block max-w-full break-words text-right text-sm font-medium leading-5 [overflow-wrap:anywhere] md:text-left ${task.is_completed ? "line-through" : "text-slate-500 dark:text-slate-400"}`}>
                         {task.note || "-"}
                       </span>
                     )}
                   </div>
 
-                  <div className="order-first flex items-center justify-between gap-1 md:order-none md:justify-center">
+                  <div className="order-first flex min-w-0 items-center justify-between gap-1 md:order-none md:justify-center">
                     <span className="text-xs font-bold text-slate-400 md:hidden">관리</span>
                     <div className="flex justify-end gap-1">
                       {editingTaskId === task.id ? (
