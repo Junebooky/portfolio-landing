@@ -596,49 +596,57 @@ export function PlannerDashboard({
 
         <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1.55fr)_minmax(360px,0.75fr)]">
           <section className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-[0_18px_50px_rgba(15,23,42,0.06)] dark:border-white/10 dark:bg-slate-900">
-            <div
-              className="flex border-b border-slate-200 bg-white p-2 dark:border-white/10 dark:bg-slate-900"
-              role="tablist"
-              aria-label="Planner 목록"
-            >
-              <button
-                type="button"
-                role="tab"
-                id="planner-tab-today"
-                aria-controls="planner-panel-today"
-                aria-selected={activeList === "today"}
-                onClick={() => setActiveList("today")}
-                className={`inline-flex h-10 flex-1 items-center justify-center gap-2 rounded-md px-3 text-sm font-extrabold transition sm:flex-none ${
-                  activeList === "today"
-                    ? "bg-blue-600 text-white shadow-sm"
-                    : "text-slate-500 hover:bg-slate-100 hover:text-slate-800 dark:text-slate-400 dark:hover:bg-white/8 dark:hover:text-white"
-                }`}
+            <div className="border-b border-slate-200 bg-white p-2 dark:border-white/10 dark:bg-slate-900">
+              <div
+                className="relative grid w-full grid-cols-2 sm:w-[360px]"
+                role="tablist"
+                aria-label="Planner 목록"
               >
-                <ListTodo className="h-4 w-4" aria-hidden="true" />
-                오늘 할 일
-                <span className={`rounded px-1.5 py-0.5 text-[10px] ${activeList === "today" ? "bg-white/15" : "bg-slate-100 dark:bg-white/8"}`}>
-                  {displayedTasks.length}
-                </span>
-              </button>
-              <button
-                type="button"
-                role="tab"
-                id="planner-tab-waiting"
-                aria-controls="planner-panel-waiting"
-                aria-selected={activeList === "waiting"}
-                onClick={() => setActiveList("waiting")}
-                className={`inline-flex h-10 flex-1 items-center justify-center gap-2 rounded-md px-3 text-sm font-extrabold transition sm:flex-none ${
-                  activeList === "waiting"
-                    ? "bg-blue-600 text-white shadow-sm"
-                    : "text-slate-500 hover:bg-slate-100 hover:text-slate-800 dark:text-slate-400 dark:hover:bg-white/8 dark:hover:text-white"
-                }`}
-              >
-                <RadioTower className="h-4 w-4" aria-hidden="true" />
-                대기·모니터링
-                <span className={`rounded px-1.5 py-0.5 text-[10px] ${activeList === "waiting" ? "bg-white/15" : "bg-slate-100 dark:bg-white/8"}`}>
-                  {waitingItems.length}
-                </span>
-              </button>
+                <span
+                  className={`pointer-events-none absolute inset-y-0 left-0 w-1/2 rounded-md bg-blue-600 shadow-sm transition-transform duration-300 ease-out motion-reduce:transition-none ${
+                    activeList === "waiting" ? "translate-x-full" : "translate-x-0"
+                  }`}
+                  aria-hidden="true"
+                />
+                <button
+                  type="button"
+                  role="tab"
+                  id="planner-tab-today"
+                  aria-controls="planner-panel-today"
+                  aria-selected={activeList === "today"}
+                  onClick={() => setActiveList("today")}
+                  className={`relative z-10 inline-flex h-10 min-w-0 items-center justify-center gap-1.5 rounded-md px-2 text-xs font-extrabold transition-colors duration-300 sm:gap-2 sm:px-3 sm:text-sm ${
+                    activeList === "today"
+                      ? "text-white"
+                      : "text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white"
+                  }`}
+                >
+                  <ListTodo className="h-4 w-4 shrink-0" aria-hidden="true" />
+                  <span className="whitespace-nowrap">오늘 할 일</span>
+                  <span className={`rounded px-1.5 py-0.5 text-[10px] transition-colors duration-300 ${activeList === "today" ? "bg-white/15" : "bg-slate-100 dark:bg-white/8"}`}>
+                    {displayedTasks.length}
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  role="tab"
+                  id="planner-tab-waiting"
+                  aria-controls="planner-panel-waiting"
+                  aria-selected={activeList === "waiting"}
+                  onClick={() => setActiveList("waiting")}
+                  className={`relative z-10 inline-flex h-10 min-w-0 items-center justify-center gap-1.5 rounded-md px-2 text-xs font-extrabold transition-colors duration-300 sm:gap-2 sm:px-3 sm:text-sm ${
+                    activeList === "waiting"
+                      ? "text-white"
+                      : "text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white"
+                  }`}
+                >
+                  <RadioTower className="h-4 w-4 shrink-0" aria-hidden="true" />
+                  <span className="whitespace-nowrap">대기·모니터링</span>
+                  <span className={`rounded px-1.5 py-0.5 text-[10px] transition-colors duration-300 ${activeList === "waiting" ? "bg-white/15" : "bg-slate-100 dark:bg-white/8"}`}>
+                    {waitingItems.length}
+                  </span>
+                </button>
+              </div>
             </div>
 
             {activeList === "today" ? (
