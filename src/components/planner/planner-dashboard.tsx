@@ -788,7 +788,7 @@ export function PlannerDashboard({
                   >
                     <span className="text-xs font-bold text-slate-400 md:hidden">기한</span>
                     {editingTaskId === task.id ? (
-                      <div className="flex flex-wrap items-center justify-end gap-1.5 md:justify-center">
+                      <div className="grid w-full grid-cols-[auto_minmax(0,1fr)_40px] items-center gap-1.5 md:flex md:flex-wrap md:justify-center">
                         <span className="shrink-0 whitespace-nowrap text-xs text-slate-500 dark:text-slate-400">
                           {formatKoreanDate(task.task_date)}
                         </span>
@@ -798,22 +798,21 @@ export function PlannerDashboard({
                           onChange={(event) => setEditDueTime(event.target.value)}
                           onKeyDown={(event) => handleEditKeyDown(event, task.id)}
                           aria-label={`${task.title} 예정 시간 수정`}
-                          className="h-9 min-w-[86px] flex-1 rounded-md border border-blue-300 bg-white px-2 text-xs font-bold text-slate-900 outline-none focus:border-blue-500 dark:border-blue-300/30 dark:bg-slate-950 dark:text-white"
+                          className="h-9 w-full min-w-0 rounded-md border border-blue-300 bg-white px-2 text-xs font-bold text-slate-900 outline-none focus:border-blue-500 md:min-w-[86px] md:flex-1 dark:border-blue-300/30 dark:bg-slate-950 dark:text-white"
                         />
-                        {editDueTime ? (
-                          <button
-                            type="button"
-                            onClick={() => setEditDueTime("")}
-                            title="예정 시간 제거"
-                            className="group inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-white/8 dark:hover:text-slate-200"
-                          >
-                            <AlarmClockOff
-                              className="h-4 w-4 transition-transform duration-200 group-hover:scale-110"
-                              aria-hidden="true"
-                            />
-                            <span className="sr-only">{task.title} 예정 시간 제거</span>
-                          </button>
-                        ) : null}
+                        <button
+                          type="button"
+                          onClick={() => setEditDueTime("")}
+                          disabled={!editDueTime}
+                          title="예정 시간 제거"
+                          aria-label={`${task.title} 예정 시간 제거`}
+                          className="group inline-flex h-9 w-10 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 transition hover:border-slate-300 hover:bg-slate-100 hover:text-slate-700 disabled:cursor-not-allowed disabled:opacity-35 dark:border-white/10 dark:bg-slate-950 dark:text-slate-300 dark:hover:bg-white/8 dark:hover:text-white"
+                        >
+                          <AlarmClockOff
+                            className="h-4 w-4 transition-transform duration-200 group-hover:scale-110"
+                            aria-hidden="true"
+                          />
+                        </button>
                       </div>
                     ) : (
                       <span className={task.is_completed ? "line-through" : "text-slate-600 dark:text-slate-300"}>
